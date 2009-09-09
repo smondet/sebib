@@ -1,0 +1,54 @@
+\documentclass[a4paper,10pt]{article}
+
+\clubpenalty=10000
+\widowpenalty=10000
+
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{multirow}
+\usepackage{ucs}
+\usepackage[utf8x,utf8]{inputenc}
+\usepackage[                         
+bookmarks         = true,         
+bookmarksnumbered = true,         
+colorlinks        = true,         
+]{hyperref}                           
+\usepackage{color}
+\definecolor{webred}{rgb}{0.3,0,0}
+\definecolor{blurl}{rgb}{0,0,0.3}
+\hypersetup{
+linkcolor         = webred, %black
+citecolor         = webred, %black
+urlcolor          = blurl , %black
+linkbordercolor   = {1 1 1},
+citebordercolor   = {1 1 1},
+urlbordercolor    = {1 1 1},
+pdfauthor   = {},
+pdftitle    = {},
+pdfsubject  = {},
+pdfkeywords = {},
+pdfcreator  = {Bracetax and PDFLaTeX},
+pdfproducer = {Bracetax and PDFLaTeX}}
+
+\usepackage[pdftex]{graphicx}
+\frenchspacing
+\DeclareGraphicsExtensions{.jpg,.mps,.pdf,.png}
+
+%Generated with BraceTax
+
+
+\begin{document}
+
+
+\section{Test}
+
+From the valid: \cite{most09complete} and
+\cite{just08anid,one07author,minimal07working}.
+
+
+
+\bibliographystyle{alpha}
+
+\bibliography{bib}
+ 
+\end{document}

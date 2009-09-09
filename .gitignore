@@ -1,4 +1,5 @@
 sebib
 src/*.cmo
 src/*.cmi
+src/*.annot
 

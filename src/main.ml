@@ -65,18 +65,26 @@ let () = (
         exit 0;
     );
     let do_validate = ref false in
+    let read_stdin = ref false in
     let usage = "sebib [OPTIONS] file1.sebib file2.sebib ..." in
     let commands = [
         Arg.command
             ~doc:"Validate the files, continue if OK, exit 2 if not" 
             "-validate"
             (Arg.Set do_validate);
+        Arg.command
+            ~doc:"Also use stdin as input" 
+            "-stdin"
+            (Arg.Set read_stdin);
     ] in
     let files = Arg.handle ~usage commands in
 
     let bibliography_str =
-        String.concat "" (List.map (fun file ->
-            File.with_file_in file (fun i -> IO.read_all i)) files);
+        String.concat "" 
+            ((IO.read_all stdin) ::
+                (List.map (fun file ->
+                    File.with_file_in file (fun i -> IO.read_all i)
+                ) files))
     in
     let biblio = Biblio.set_of_string bibliography_str in
 

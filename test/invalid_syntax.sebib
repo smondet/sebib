@@ -1,0 +1,12 @@
+
+(
+    (id most09complete)
+    (authors ((Most John) (Family First)))
+    (title "The most complete example")
+    (how "By the hand of God")
+)
+
+; some comment...
+((id just08anid))
+
+((id one07author) (authors (Author One)))

@@ -1,0 +1,48 @@
+
+(
+    (id most09complete)
+    (authors ((Most John) (Family First)))
+    (title "The most complete example")
+    (how "By the hand of God")
+    (date "Wed Sep  9 11:39:58 CEST 2009")
+    (year "1901")
+    (url http://url.to.the/page?of&the&paper)
+    (pdfurl http://link.t.o/the?pdf)
+    (image http://link.t.o/the?img&fmt=png)
+    (comments "
+        {i|Some comments}, using {t|bracetax}
+        we can enter double quotes: \"
+        ")
+    (bibtex "
+@inproceedings{1434297,
+ author = {Skevik, Karl-Andr\'{e} and Siekkinen, Matti and Goebel, Vera and Plagemann, Thomas},
+ title = {Experiences with Application Development for Autonomic Networks},
+ booktitle = {MACE '08: Proceedings of the 3rd IEEE international workshop on Modelling Autonomic Communications Environments},
+ year = {2008},
+ isbn = {978-3-540-87354-9},
+ pages = {1--13},
+ location = {Samos Island, Greece},
+ doi = {http://dx.doi.org/10.1007/978-3-540-87355-6_1},
+ publisher = {Springer-Verlag},
+ address = {Berlin, Heidelberg},
+ }
+    ")
+    (note "Some information...")
+    (abstract "A \"lot\" of information.")
+    (doi http://dx.doi.org/10.1007/978-3-540-87355-6_1) 
+    (citation " Skevik, K., Siekkinen, M., Goebel, V., and Plagemann, T. 2008. Experiences with Application Development for Autonomic Networks. In Proceedings of the 3rd IEEE international Workshop on Modelling Autonomic Communications Environments (Samos Island, Greece, September 22 - 26, 2008). S. Meer, M. Burgess, and S. Denazis, Eds. Lecture Notes In Computer Science, vol. 5276. Springer-Verlag, Berlin, Heidelberg, 1-13. DOI= http://dx.doi.org/10.1007/978-3-540-87355-6_1 ")
+)
+
+; some comment...
+((id just08anid))
+
+(
+    (id minimal07working)
+    (authors ((Normal John) (Family First)))
+    (title "The not complete example")
+    (how "By the hand of God")
+    (date "Wed Sep  9 11:39:58 CEST 2009")
+    (year "1902")
+)
+
+((id one07author) (authors ((Author One))))

@@ -280,6 +280,7 @@ module Request = struct
         | `matches (f,r) -> 
             let str = Biblio.field_or_empty f entry in
             let rgx = Str.regexp r in
+            (str <> "") &&
             (try Str.search_forward rgx str 0 >= 0 with Not_found -> false)
         | `ids l ->
             let idstr = Biblio.field_or_empty `id entry in

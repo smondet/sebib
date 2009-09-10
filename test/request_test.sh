@@ -24,3 +24,4 @@ do_test "(matches (authors Joh))"
 do_test "(matches (title \"comple.*\"))"
 do_test "(not (matches (title comple.*)))"
 
+do_test "(matches (more \"\"))"

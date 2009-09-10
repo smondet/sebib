@@ -64,6 +64,7 @@ module Biblio = struct
         | `citation of string
         | `tags of string list
         | `keywords of string list
+        | `more of string
     ]
     with sexp
 
@@ -84,6 +85,7 @@ module Biblio = struct
         | `citation 
         | `tags 
         | `keywords 
+        | `more
     ]
     with sexp
     type entry = field list with sexp
@@ -127,6 +129,7 @@ module Biblio = struct
         | `citation  -> (f (function `citation v -> true | _ -> false) entry)
         | `tags      -> (f (function `tags     v -> true | _ -> false) entry)
         | `keywords  -> (f (function `keywords v -> true | _ -> false) entry)
+        | `more      -> (f (function `more     v -> true | _ -> false) entry)
     )
 
     
@@ -148,6 +151,7 @@ module Biblio = struct
         | Some (`citation  s) -> s
         | Some (`tags      l) -> String.concat ", " l
         | Some (`keywords  l) -> String.concat ", " l
+        | Some (`more      s) -> s
         | _ -> ""
 end
 
@@ -212,6 +216,7 @@ module Format = struct
             | "@{citation}" -> strfield `citation  entry
             | "@{tags}"     -> strfield `tags      entry
             | "@{keywords}" -> strfield `keywords  entry
+            | "@{more}"     -> strfield `more      entry
             | "@{@}" -> "@"
             | "@{n}" -> "\n"
             | s -> s
@@ -249,6 +254,7 @@ module Format = struct
 \t\t@{citation}       : citation
 \t\t@{tags}           : tags (coma separated list)
 \t\t@{keywords}       : keywords (coma separated list)
+\t\t@{more}           : more
 \t\t@{@}              : the '@' character
 \t\t@{n}              : the new-line character
 "

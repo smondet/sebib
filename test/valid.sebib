@@ -32,6 +32,9 @@
     (abstract "A \"lot\" of information.")
     (doi http://dx.doi.org/10.1007/978-3-540-87355-6_1) 
     (citation " Skevik, K., Siekkinen, M., Goebel, V., and Plagemann, T. 2008. Experiences with Application Development for Autonomic Networks. In Proceedings of the 3rd IEEE international Workshop on Modelling Autonomic Communications Environments (Samos Island, Greece, September 22 - 26, 2008). S. Meer, M. Burgess, and S. Denazis, Eds. Lecture Notes In Computer Science, vol. 5276. Springer-Verlag, Berlin, Heidelberg, 1-13. DOI= http://dx.doi.org/10.1007/978-3-540-87355-6_1 ")
+
+    ; more is user-defined, can be any string...
+    (more "(another (s- (expr or) (maybe <XML/>) (or whatever)))")
 )
 
 ; some comment...

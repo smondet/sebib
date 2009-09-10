@@ -46,7 +46,10 @@
     (year "1902")
 )
 
-((id one07author) (authors ((Author One))))
+((id one07author)
+    (authors ((Author One)))
+    (tags (tag7 tag8 onemoretag))
+)
 
 ((id many07authors)
     (authors (

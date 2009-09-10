@@ -67,6 +67,25 @@ module Biblio = struct
     ]
     with sexp
 
+    type field_name = [
+        | `id 
+        | `authors 
+        | `title 
+        | `how 
+        | `date 
+        | `year 
+        | `url 
+        | `pdfurl 
+        | `comments 
+        | `bibtex 
+        | `note 
+        | `abstract 
+        | `doi 
+        | `citation 
+        | `tags 
+        | `keywords 
+    ]
+    with sexp
     type entry = field list with sexp
 
     type set = entry list with sexp
@@ -89,7 +108,7 @@ module Biblio = struct
     let string_of_set set =
         Sexplib.Sexp.to_string (sexp_of_set set)
 
-    let find_field field (entry:entry) = (
+    let find_field (field:field_name) (entry:entry) = (
         let f  = List.Exceptionless.find in
         match field with
         | `id        -> (f (function `id       v -> true | _ -> false) entry)
@@ -109,24 +128,36 @@ module Biblio = struct
         | `tags      -> (f (function `tags     v -> true | _ -> false) entry)
         | `keywords  -> (f (function `keywords v -> true | _ -> false) entry)
     )
+
+    
+    let field_or_empty ?(authors_style=`comas) (fi:field_name) entry = 
+        match find_field fi entry with
+        | Some (`authors al) -> AuthorList.to_string ~style:authors_style al
+        | Some (`title tit) -> tit
+        | Some (`id id) -> id
+        | Some (`how how) -> how
+        | Some (`year y) -> string_of_int y
+        | Some (`note n) -> n
+        | Some (`date      s) -> s
+        | Some (`url       s) -> s
+        | Some (`pdfurl    s) -> s
+        | Some (`comments  s) -> s
+        | Some (`bibtex    s) -> s
+        | Some (`abstract  s) -> s
+        | Some (`doi       s) -> s
+        | Some (`citation  s) -> s
+        | Some (`tags      l) -> String.concat ", " l
+        | Some (`keywords  l) -> String.concat ", " l
+        | _ -> ""
 end
 
 module BibTeX = struct
 
-    
-    let authors_string = AuthorList.to_string ~style:`bibtex 
 
     let str set = (
         let field_or_empty fi entry = 
-            match Biblio.find_field fi entry with
-            | Some (`authors al) -> authors_string al
-            | Some (`title tit) -> tit
-            | Some (`id id) -> id
-            | Some (`how how) -> how
-            | Some (`year y) -> string_of_int y
-            | Some (`note n) -> n
-            | _ -> ""
-        in
+            Biblio.field_or_empty ~authors_style:`bibtex fi entry in
+        (* TODO: sanitize for (Bib)TeX *)
         String.concat "\n\n"
             (List.map (fun entry ->
                 match Biblio.find_field `bibtex entry with
@@ -152,53 +183,35 @@ end
 module Format = struct
 
 
-    let field_or_empty ?(authors_style=`comas) fi entry = 
-        match Biblio.find_field fi entry with
-        | Some (`authors al) -> AuthorList.to_string ~style:authors_style al
-        | Some (`title tit) -> tit
-        | Some (`id id) -> id
-        | Some (`how how) -> how
-        | Some (`year y) -> string_of_int y
-        | Some (`note n) -> n
-        | Some (`date      s) -> s
-        | Some (`url       s) -> s
-        | Some (`pdfurl    s) -> s
-        | Some (`comments  s) -> s
-        | Some (`bibtex    s) -> s
-        | Some (`abstract  s) -> s
-        | Some (`doi       s) -> s
-        | Some (`citation  s) -> s
-        | Some (`tags      l) -> String.concat ", " l
-        | Some (`keywords  l) -> String.concat ", " l
-        | _ -> ""
 
     let str ~pattern set = (
         let rgx = Str.regexp "@{[a-z-@]+}" in
+        let strfield = Biblio.field_or_empty in
         let subs entry = function
-            | "@{id}" -> field_or_empty `id entry
-            | "@{authors}" -> field_or_empty `authors entry
+            | "@{id}" -> strfield `id entry
+            | "@{authors}" -> strfield `authors entry
             | "@{authors-and}" ->
-                field_or_empty ~authors_style:`comas_and `authors entry
+                strfield ~authors_style:`comas_and `authors entry
             | "@{authors-bibtex}" ->
-                field_or_empty ~authors_style:`bibtex `authors entry
+                strfield ~authors_style:`bibtex `authors entry
             | "@{authors-acm}" ->
-                field_or_empty ~authors_style:`acm `authors entry
+                strfield ~authors_style:`acm `authors entry
             | "@{authors-etal}" ->
-                field_or_empty ~authors_style:`et_al `authors entry
-            | "@{title}" -> field_or_empty `title entry
-            | "@{how}" -> field_or_empty `how entry
-            | "@{year}" -> field_or_empty `year entry
-            | "@{note}" -> field_or_empty `note entry
-            | "@{date}"     -> field_or_empty `date      entry
-            | "@{url}"      -> field_or_empty `url       entry
-            | "@{pdfurl}"   -> field_or_empty `pdfurl    entry
-            | "@{comments}" -> field_or_empty `comments  entry
-            | "@{bibtex}"   -> field_or_empty `bibtex    entry
-            | "@{abstract}" -> field_or_empty `abstract  entry
-            | "@{doi}"      -> field_or_empty `doi       entry
-            | "@{citation}" -> field_or_empty `citation  entry
-            | "@{tags}"     -> field_or_empty `tags      entry
-            | "@{keywords}" -> field_or_empty `keywords  entry
+                strfield ~authors_style:`et_al `authors entry
+            | "@{title}" -> strfield `title entry
+            | "@{how}" -> strfield `how entry
+            | "@{year}" -> strfield `year entry
+            | "@{note}" -> strfield `note entry
+            | "@{date}"     -> strfield `date      entry
+            | "@{url}"      -> strfield `url       entry
+            | "@{pdfurl}"   -> strfield `pdfurl    entry
+            | "@{comments}" -> strfield `comments  entry
+            | "@{bibtex}"   -> strfield `bibtex    entry
+            | "@{abstract}" -> strfield `abstract  entry
+            | "@{doi}"      -> strfield `doi       entry
+            | "@{citation}" -> strfield `citation  entry
+            | "@{tags}"     -> strfield `tags      entry
+            | "@{keywords}" -> strfield `keywords  entry
             | "@{@}" -> "@"
             | "@{n}" -> "\n"
             | s -> s
@@ -219,9 +232,9 @@ module Format = struct
 \t\t@{authors-acm}    : authors (like ACM Ref, with initials)
 \t\t@{authors-etal}   : authors 
 \t\t                    (Depending on the number of authors:
-\t\t                        1: 'Last name'
-\t\t                        2: 'Last name 1' and 'Last name 2'
-\t\t                        more: 'Last name 1' et al.)
+\t\t                        1: Lastname
+\t\t                        2: Lastname1 and Lastname2
+\t\t                        more: Lastname1 et al.)
 \t\t@{title}          : title
 \t\t@{how}            : how
 \t\t@{year}           : year
@@ -241,6 +254,66 @@ module Format = struct
 "
 
 end
+
+module Request = struct
+
+    type t = [
+        | `list_and of t list
+        | `list_or of t list
+        | `not of t
+        | `matches of Biblio.field_name * string
+        | `ids of string list
+        | `tags of string list
+    ] with sexp
+
+    let rec is_ok entry (req:t) = (
+        match req with
+        | `list_and l -> List.for_all (is_ok entry) l
+        | `list_or l -> List.exists (is_ok entry) l
+        | `not t -> not (is_ok entry t)
+        | `matches (f,r) -> 
+            let str = Biblio.field_or_empty f entry in
+            let rgx = Str.regexp r in
+            (try Str.search_forward rgx str 0 >= 0 with Not_found -> false)
+        | `ids l ->
+            let idstr = Biblio.field_or_empty `id entry in
+            List.exists ((=) idstr) l
+        | `tags tags_request -> 
+            match Biblio.find_field `tags entry with
+            | Some (`tags tag_list) ->
+                List.for_all
+                    (fun tag -> List.exists ((=) tag) tag_list)
+                    tags_request
+            | _ -> false
+
+    )
+
+    let exec req set = (
+        List.filter (fun e -> is_ok e req) set
+    )
+    let of_string str = (
+        t_of_sexp (Sexplib.Sexp.of_string str)
+    )
+    let help = "
+\tSyntax of the expressions:
+\t\t(ids (<id1> <id2> <id3> ...))
+\t\t   -> the items whose ids are <id1>, <id2>, ...
+\t\t(list_and (<expr1> <expr2> ...))
+\t\t   -> logical \"and\" between expressions
+\t\t(list_or (<expr1> <expr2> ...))
+\t\t   -> logical \"or\" between expressions
+\t\t(not <expr>)
+\t\t   -> logical negation of an expression
+\t\t(tags (<tag1> <tag2> <tag3>))
+\t\t   -> look for the tags (it is an intersection, an \"and\")
+\t\t(matches (<field> <regexp>))
+\t\t   -> look if you find <regexp> in <field>
+\t\t      example: (matches (title comp[a-z]*))
+"
+
+end
+
+
 
 let testminimal () = (
     let sexp_set =
@@ -262,6 +335,7 @@ let () = (
     let read_stdin = ref false in
     let bibtex = ref "" in
     let out_format = ref "" in
+    let request = ref "" in
     let usage = "sebib [OPTIONS] file1.sebib file2.sebib ..." in
     let commands = [
         Arg.command
@@ -282,6 +356,11 @@ let () = (
             \tThe format is:" ^ Format.help)
             "-format"
             (Arg.Set_string out_format);
+        Arg.command
+            ~doc:("<s-expr>\n\
+            \tFilter the bibliography with a query:" ^ Request.help)
+            "-select"
+            (Arg.Set_string request);
     ] in
     let files = Arg.handle ~usage commands in
 
@@ -293,7 +372,10 @@ let () = (
                 ((IO.read_all stdin) :: strs_from_files)
             else strs_from_files) in
 
-    let biblio = Biblio.set_of_string bibliography_str in
+    let biblio = 
+        let b = Biblio.set_of_string bibliography_str in
+        if !request = "" then b 
+        else Request.exec (Request.of_string !request) b in
 
     if !do_validate then (
         match Biblio.is_valid biblio with
@@ -305,6 +387,7 @@ let () = (
                 (Biblio.string_of_set l);
             exit 2;
     );
+
     begin match !bibtex with
     | "" -> ();
     | "-" -> printf p"%s\n" (BibTeX.str biblio);

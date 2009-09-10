@@ -25,3 +25,7 @@ do_test "(matches (title \"comple.*\"))"
 do_test "(not (matches (title comple.*)))"
 
 do_test "(matches (more \"\"))"
+
+
+do_test "(has more)"
+do_test "(not (has how))"

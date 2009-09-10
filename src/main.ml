@@ -270,6 +270,7 @@ module Request = struct
         | `matches of Biblio.field_name * string
         | `ids of string list
         | `tags of string list
+        | `has of Biblio.field_name
     ] with sexp
 
     let rec is_ok entry (req:t) = (
@@ -286,12 +287,18 @@ module Request = struct
             let idstr = Biblio.field_or_empty `id entry in
             List.exists ((=) idstr) l
         | `tags tags_request -> 
-            match Biblio.find_field `tags entry with
+            begin match Biblio.find_field `tags entry with
             | Some (`tags tag_list) ->
                 List.for_all
                     (fun tag -> List.exists ((=) tag) tag_list)
                     tags_request
             | _ -> false
+            end
+        | `has f -> 
+            begin match Biblio.find_field f entry with
+            | Some _ -> true
+            | None -> false
+            end
 
     )
 
@@ -316,6 +323,9 @@ module Request = struct
 \t\t(matches (<field> <regexp>))
 \t\t   -> look if you find <regexp> in <field>
 \t\t      example: (matches (title comp[a-z]*))
+\t\t(has <field>)
+\t\t   -> the field is present
+\t\t      functionally equivalent to (matches (<field> \"\"))
 "
 
 end

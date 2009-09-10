@@ -1,0 +1,21 @@
+------------------------------------------------
+@{@}{id}             : @{id}            @{n}  
+@{@}{authors}        : @{authors}       @{n}       
+@{@}{authors-and}    : @{authors-and}   @{n}           
+@{@}{authors-bibtex} : @{authors-bibtex}@{n}              
+@{@}{authors-acm}    : @{authors-acm}   @{n}           
+@{@}{authors-etal}   : @{authors-etal}  @{n}            
+@{@}{title}          : @{title}         @{n}     
+@{@}{how}            : @{how}           @{n}   
+@{@}{year}           : @{year}          @{n}    
+@{@}{note}           : @{note}          @{n}    
+@{@}{date}           : @{date}          @{n}    
+@{@}{url}            : @{url}           @{n}   
+@{@}{pdfurl}         : @{pdfurl}        @{n}      
+@{@}{comments}       : @{comments}      @{n}        
+@{@}{bibtex}         : @{bibtex}        @{n}      
+@{@}{abstract}       : @{abstract}      @{n}        
+@{@}{doi}            : @{doi}           @{n}   
+@{@}{citation}       : @{citation}      @{n}        
+@{@}{tags}           : @{tags}          @{n}    
+@{@}{keywords}       : @{keywords}      @{n}        

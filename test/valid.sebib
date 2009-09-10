@@ -1,14 +1,15 @@
 
 (
     (id most09complete)
-    (authors ((Most John) (Family First)))
+    (authors ((John Most) (First Family)))
     (title "The most complete example")
     (how "By the hand of God")
     (date "Wed Sep  9 11:39:58 CEST 2009")
     (year "1901")
+    (keywords ("Personal Data Management" "Forty-two"))
     (url http://url.to.the/page?of&the&paper)
     (pdfurl http://link.t.o/the?pdf)
-    (image http://link.t.o/the?img&fmt=png)
+    (tags (onetag onemoretag))
     (comments "
         {i|Some comments}, using {t|bracetax}
         we can enter double quotes: \"
@@ -38,11 +39,21 @@
 
 (
     (id minimal07working)
-    (authors ((Normal John) (Family First)))
+    (date "Wed Sep  9 11:39:58 CEST 2009")
+    (authors ((John Normal) (First Family)))
     (title "The not complete example")
     (how "By the hand of God")
-    (date "Wed Sep  9 11:39:58 CEST 2009")
     (year "1902")
 )
 
 ((id one07author) (authors ((Author One))))
+
+((id many07authors)
+    (authors (
+        (First Family1)
+        (First Family2)
+        (First Family3)
+        (First Family4)
+        (First Family5)
+        (First Family6)
+    )))

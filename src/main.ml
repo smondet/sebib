@@ -2,25 +2,68 @@ TYPE_CONV_PATH "MainOfSebib"
 
 open Print
 
-module Biblio = struct
+module AuthorList = struct
     type author = string * string with sexp
+    type t = author list with sexp
+
+    type style = [ `comas_and | `acm | `bibtex | `comas | `et_al ] with sexp
+
+    let to_string ?(style:style=`comas) authors = (
+        match style with
+        | `bibtex ->
+            String.concat " and "
+                (List.map (fun (first, last) ->
+                    sprintf p"%s, %s" last first) authors)
+        | `comas_and ->
+            let lgth = List.length authors in
+            String.concat ", "
+                (List.mapi (fun i (first, last) ->
+                    let strand =
+                        if i = lgth - 1 && i <> 0 then "and " else "" in
+                    sprintf p"%s%s %s" strand first last) authors)
+        | `comas -> 
+            String.concat ", "
+                (List.map (fun (first, last) ->
+                    sprintf p"%s %s" first last) authors)
+        | `acm -> 
+            let lgth = List.length authors in
+            String.concat ", "
+                (List.mapi (fun i (first, last) ->
+                    let strand =
+                        if i = lgth - 1 && i <> 0 then "and " else "" in
+                    let initial =
+                        if String.length first = 0 
+                        then '_' else first.[0] in
+                    sprintf p"%s%s, %c." strand last initial) authors)
+        | `et_al ->
+            match authors with
+            | [] -> ""
+            | [(onef,onel)] -> onel
+            | [(onef,onel); (twof,twol) ] -> sprintf p"%s and %s" onel twol
+            | (onef,onel) :: l -> onel ^ "et al."
+
+    )
+end
+
+module Biblio = struct
 
     type field = [
         | `id of string
-        | `authors of author list
+        | `authors of AuthorList.t
         | `title of string
         | `how of string
         | `date of string
         | `year of int
         | `url of string
         | `pdfurl of string
-        | `image of string
         | `comments of string
         | `bibtex of string
         | `note of string
         | `abstract of string
         | `doi of string
         | `citation of string
+        | `tags of string list
+        | `keywords of string list
     ]
     with sexp
 
@@ -57,24 +100,21 @@ module Biblio = struct
         | `year      -> (f (function `year     v -> true | _ -> false) entry)
         | `url       -> (f (function `url      v -> true | _ -> false) entry)
         | `pdfurl    -> (f (function `pdfurl   v -> true | _ -> false) entry)
-        | `image     -> (f (function `image    v -> true | _ -> false) entry)
         | `comments  -> (f (function `comments v -> true | _ -> false) entry)
         | `bibtex    -> (f (function `bibtex   v -> true | _ -> false) entry)
         | `note      -> (f (function `note     v -> true | _ -> false) entry)
         | `abstract  -> (f (function `abstract v -> true | _ -> false) entry)
         | `doi       -> (f (function `doi      v -> true | _ -> false) entry)
         | `citation  -> (f (function `citation v -> true | _ -> false) entry)
+        | `tags      -> (f (function `tags     v -> true | _ -> false) entry)
+        | `keywords  -> (f (function `keywords v -> true | _ -> false) entry)
     )
 end
 
 module BibTeX = struct
 
     
-    let authors_string authors = (
-        String.concat " and "
-            (List.map (fun (last, first) ->
-                sprintf p"%s, %s" last first) authors)
-    )
+    let authors_string = AuthorList.to_string ~style:`bibtex 
 
     let str set = (
         let field_or_empty fi entry = 
@@ -109,11 +149,105 @@ module BibTeX = struct
     )
 end
 
+module Format = struct
+
+
+    let field_or_empty ?(authors_style=`comas) fi entry = 
+        match Biblio.find_field fi entry with
+        | Some (`authors al) -> AuthorList.to_string ~style:authors_style al
+        | Some (`title tit) -> tit
+        | Some (`id id) -> id
+        | Some (`how how) -> how
+        | Some (`year y) -> string_of_int y
+        | Some (`note n) -> n
+        | Some (`date      s) -> s
+        | Some (`url       s) -> s
+        | Some (`pdfurl    s) -> s
+        | Some (`comments  s) -> s
+        | Some (`bibtex    s) -> s
+        | Some (`abstract  s) -> s
+        | Some (`doi       s) -> s
+        | Some (`citation  s) -> s
+        | Some (`tags      l) -> String.concat ", " l
+        | Some (`keywords  l) -> String.concat ", " l
+        | _ -> ""
+
+    let str ~pattern set = (
+        let rgx = Str.regexp "@{[a-z-@]+}" in
+        let subs entry = function
+            | "@{id}" -> field_or_empty `id entry
+            | "@{authors}" -> field_or_empty `authors entry
+            | "@{authors-and}" ->
+                field_or_empty ~authors_style:`comas_and `authors entry
+            | "@{authors-bibtex}" ->
+                field_or_empty ~authors_style:`bibtex `authors entry
+            | "@{authors-acm}" ->
+                field_or_empty ~authors_style:`acm `authors entry
+            | "@{authors-etal}" ->
+                field_or_empty ~authors_style:`et_al `authors entry
+            | "@{title}" -> field_or_empty `title entry
+            | "@{how}" -> field_or_empty `how entry
+            | "@{year}" -> field_or_empty `year entry
+            | "@{note}" -> field_or_empty `note entry
+            | "@{date}"     -> field_or_empty `date      entry
+            | "@{url}"      -> field_or_empty `url       entry
+            | "@{pdfurl}"   -> field_or_empty `pdfurl    entry
+            | "@{comments}" -> field_or_empty `comments  entry
+            | "@{bibtex}"   -> field_or_empty `bibtex    entry
+            | "@{abstract}" -> field_or_empty `abstract  entry
+            | "@{doi}"      -> field_or_empty `doi       entry
+            | "@{citation}" -> field_or_empty `citation  entry
+            | "@{tags}"     -> field_or_empty `tags      entry
+            | "@{keywords}" -> field_or_empty `keywords  entry
+            | "@{@}" -> "@"
+            | "@{n}" -> "\n"
+            | s -> s
+        in
+        String.concat ""
+            (List.concat (List.map (fun entry ->
+                List.map (function
+                    | Str.Text t -> t
+                    | Str.Delim s -> subs entry s)
+                    (Str.full_split rgx pattern)) set))
+    )
+
+    let help = "
+\t\t@{id}             : id
+\t\t@{authors}        : authors (coma separated list)
+\t\t@{authors-and}    : authors (comas and a 'and' for the last one
+\t\t@{authors-bibtex} : authors (BibTeX friendly format)
+\t\t@{authors-acm}    : authors (like ACM Ref, with initials)
+\t\t@{authors-etal}   : authors 
+\t\t                    (Depending on the number of authors:
+\t\t                        1: 'Last name'
+\t\t                        2: 'Last name 1' and 'Last name 2'
+\t\t                        more: 'Last name 1' et al.)
+\t\t@{title}          : title
+\t\t@{how}            : how
+\t\t@{year}           : year
+\t\t@{note}           : note
+\t\t@{date}           : date
+\t\t@{url}            : url
+\t\t@{pdfurl}         : pdfurl
+\t\t@{comments}       : comments
+\t\t@{bibtex}         : bibtex
+\t\t@{abstract}       : abstract
+\t\t@{doi}            : doi
+\t\t@{citation}       : citation
+\t\t@{tags}           : tags (coma separated list)
+\t\t@{keywords}       : keywords (coma separated list)
+\t\t@{@}              : the '@' character
+\t\t@{n}              : the new-line character
+"
+
+end
+
 let testminimal () = (
     let sexp_set =
         Biblio.sexp_of_set [
-            [`id "bouh"; `authors [("Mondet", "Sebastien"); ("Patate",
-                "Monsieur")]; (`year 2031);];
+            [`id "bouh";
+                `authors [("Sebastien", "Mondet"); ("Mr", "Patate");];
+                (`year 2031);];
             [`id "brout"; `how "Butterfly effect on processors"]
         ] in
     print_string (Sexplib.Sexp.to_string sexp_set);
@@ -127,6 +261,7 @@ let () = (
     let do_validate = ref false in
     let read_stdin = ref false in
     let bibtex = ref "" in
+    let out_format = ref "" in
     let usage = "sebib [OPTIONS] file1.sebib file2.sebib ..." in
     let commands = [
         Arg.command
@@ -141,6 +276,12 @@ let () = (
             ~doc:"<file>\n\tOutput a BibTeX file (- for stdout)" 
             "-bibtex"
             (Arg.Set_string bibtex);
+        Arg.command
+            ~doc:("<string>\n\
+            \tOutput to stdout using the <string> format for each entry\n\
+            \tThe format is:" ^ Format.help)
+            "-format"
+            (Arg.Set_string out_format);
     ] in
     let files = Arg.handle ~usage commands in
 
@@ -171,6 +312,10 @@ let () = (
         File.with_file_out f (fun o -> fprintf o p"%s" (BibTeX.str biblio));
     end;
 
+
+    if !out_format <> "" then (
+        Format.str ~pattern:!out_format biblio |> printf p"%s";
+    );
 
     (* printf p"END\n%!"; *)
 

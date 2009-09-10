@@ -11,8 +11,11 @@ do_test() {
 do_test "(ids (most09complete one07author))"
 do_test "(ids (minimal07working))"
 
-do_test "(list_and ((ids (most09complete one07author)) (ids (minimal07working))))"
+do_test "(list_and ((ids (most09complete one07author)) (has more)))"
 do_test "(list_or ((ids (most09complete one07author)) (ids (minimal07working))))"
+
+do_test "(la ((ids (most09complete one07author)) (has more)))"
+do_test "(lo ((ids (most09complete one07author)) (ids (minimal07working))))"
 
 
 do_test "(tags (onetag))"

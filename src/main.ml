@@ -265,7 +265,9 @@ module Request = struct
 
     type t = [
         | `list_and of t list
+        | `la of t list
         | `list_or of t list
+        | `lo of t list
         | `not of t
         | `matches of Biblio.field_name * string
         | `ids of string list
@@ -275,8 +277,8 @@ module Request = struct
 
     let rec is_ok entry (req:t) = (
         match req with
-        | `list_and l -> List.for_all (is_ok entry) l
-        | `list_or l -> List.exists (is_ok entry) l
+        | `list_and l | `la l -> List.for_all (is_ok entry) l
+        | `list_or l | `lo l -> List.exists (is_ok entry) l
         | `not t -> not (is_ok entry t)
         | `matches (f,r) -> 
             let str = Biblio.field_or_empty f entry in
@@ -314,8 +316,10 @@ module Request = struct
 \t\t   -> the items whose ids are <id1>, <id2>, ...
 \t\t(list_and (<expr1> <expr2> ...))
 \t\t   -> logical \"and\" between expressions
+\t\t      (la ...) is a shortcut to (list_and ...)
 \t\t(list_or (<expr1> <expr2> ...))
 \t\t   -> logical \"or\" between expressions
+\t\t      (lo ...) is a shortcut to (list_or ...)
 \t\t(not <expr>)
 \t\t   -> logical negation of an expression
 \t\t(tags (<tag1> <tag2> <tag3>))

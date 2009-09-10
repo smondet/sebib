@@ -130,15 +130,15 @@ let () = (
     let usage = "sebib [OPTIONS] file1.sebib file2.sebib ..." in
     let commands = [
         Arg.command
-            ~doc:"Validate the files, continue if OK, exit 2 if not" 
+            ~doc:"\n\tValidate the files, continue if OK, exit 2 if not" 
             "-validate"
             (Arg.Set do_validate);
         Arg.command
-            ~doc:"Also use stdin as input" 
+            ~doc:"\n\tAlso use stdin as input" 
             "-stdin"
             (Arg.Set read_stdin);
         Arg.command
-            ~doc:"Output a BibTeX file (- for stdout)" 
+            ~doc:"<file>\n\tOutput a BibTeX file (- for stdout)" 
             "-bibtex"
             (Arg.Set_string bibtex);
     ] in
@@ -156,7 +156,9 @@ let () = (
 
     if !do_validate then (
         match Biblio.is_valid biblio with
-        | `yes -> printf p"Validation: OK\n";
+        | `yes ->
+            (* printf p"Validation: OK\n"; *)
+            ()
         | `no l ->
             printf p"Validation: Following are wrong:\n%s\n" 
                 (Biblio.string_of_set l);

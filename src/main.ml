@@ -284,32 +284,35 @@ module BibTeX = struct
         Buffer.contents ascii_buff
     )
 
-    let str set = (
+    let format_entry entry = (
         let field fi entry = 
             Biblio.field_or_empty ~authors_style:`bibtex fi entry
                 |> sanitize_latex in
         let sanitize_title str =
             let rgx = Str.regexp "\\([^\\]\\)\\([A-Z]+\\)" in
             Str.global_replace rgx "\\1{\\2}" str in
-        String.concat "\n\n"
-            (List.map (fun entry ->
-                match Biblio.find_field `bibtex entry with
-                | Some (`bibtex b) -> b
-                | _ ->
-                    sprintf p"@misc{%s,\n\
-                        \    author = {%s},\n\
-                        \    title = {%s},\n\
-                        \    howpublished = {%s},\n\
-                        \    year = {%s},\n\
-                        \    note = {%s}\n\
-                    }\n"
-                    (field `id entry)
-                    (field `authors entry)
-                    (sanitize_title (field `title entry))
-                    (field `how entry)
-                    (field `year entry)
-                    (field `note entry)
-            ) set)
+        match Biblio.find_field `bibtex entry with
+        | Some (`bibtex b) ->
+            let rgx = Str.regexp "^[ ]*" in
+            Str.global_replace rgx "" b
+        | _ ->
+            sprintf p"@misc{%s,\n\
+                author = {%s},\n\
+                title = {%s},\n\
+                howpublished = {%s},\n\
+                year = {%s},\n\
+                note = {%s}\n\
+                }\n"
+                (field `id entry)
+                (field `authors entry)
+                (sanitize_title (field `title entry))
+                (field `how entry)
+                (field `year entry)
+                (field `note entry)
+    )
+
+    let str set = (
+        String.concat "\n\n" (List.map format_entry set)
     )
 end
 
@@ -339,7 +342,7 @@ module Format = struct
             | "@{url}"      -> strfield `url       entry
             | "@{pdfurl}"   -> strfield `pdfurl    entry
             | "@{comments}" -> strfield `comments  entry
-            | "@{bibtex}"   -> strfield `bibtex    entry
+            | "@{bibtex}"   -> BibTeX.format_entry entry
             | "@{abstract}" -> strfield `abstract  entry
             | "@{doi}"      -> strfield `doi       entry
             | "@{citation}" -> strfield `citation  entry
@@ -377,7 +380,9 @@ module Format = struct
 \t\t@{url}            : url
 \t\t@{pdfurl}         : pdfurl
 \t\t@{comments}       : comments
-\t\t@{bibtex}         : bibtex
+\t\t@{bibtex}         : The (maybe generated) BibTeX entry
+                        (if there's no `bibtex' field, the entry is generated,
+                        like for the '-bibtex' option)
 \t\t@{abstract}       : abstract
 \t\t@{doi}            : doi
 \t\t@{citation}       : citation

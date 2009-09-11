@@ -361,36 +361,37 @@ module Format = struct
                     (Str.full_split rgx pattern)) set))
     )
 
-    let help = "
-\t\t@{id}             : id
-\t\t@{authors}        : authors (coma separated list)
-\t\t@{authors-and}    : authors (comas and a 'and' for the last one
-\t\t@{authors-bibtex} : authors (BibTeX friendly format)
-\t\t@{authors-acm}    : authors (like ACM Ref, with initials)
-\t\t@{authors-etal}   : authors 
-\t\t                    (Depending on the number of authors:
-\t\t                        1: Lastname
-\t\t                        2: Lastname1 and Lastname2
-\t\t                        more: Lastname1 et al.)
-\t\t@{title}          : title
-\t\t@{how}            : how
-\t\t@{year}           : year
-\t\t@{note}           : note
-\t\t@{date}           : date
-\t\t@{url}            : url
-\t\t@{pdfurl}         : pdfurl
-\t\t@{comments}       : comments
-\t\t@{bibtex}         : The (maybe generated) BibTeX entry
+    let help = "\
+The format is a string with special patterns:
+    @{id}             : id
+    @{authors}        : authors (coma separated list)
+    @{authors-and}    : authors (comas and a 'and' for the last one
+    @{authors-bibtex} : authors (BibTeX friendly format)
+    @{authors-acm}    : authors (like ACM Ref, with initials)
+    @{authors-etal}   : authors 
+                        (Depending on the number of authors:
+                            1: Lastname
+                            2: Lastname1 and Lastname2
+                            more: Lastname1 et al.)
+    @{title}          : title
+    @{how}            : how
+    @{year}           : year
+    @{note}           : note
+    @{date}           : date
+    @{url}            : url
+    @{pdfurl}         : pdfurl
+    @{comments}       : comments
+    @{bibtex}         : The (maybe generated) BibTeX entry
                         (if there's no `bibtex' field, the entry is generated,
                         like for the '-bibtex' option)
-\t\t@{abstract}       : abstract
-\t\t@{doi}            : doi
-\t\t@{citation}       : citation
-\t\t@{tags}           : tags (coma separated list)
-\t\t@{keywords}       : keywords (coma separated list)
-\t\t@{more}           : more
-\t\t@{@}              : the '@' character
-\t\t@{n}              : the new-line character
+    @{abstract}       : abstract
+    @{doi}            : doi
+    @{citation}       : citation
+    @{tags}           : tags (coma separated list)
+    @{keywords}       : keywords (coma separated list)
+    @{more}           : more
+    @{@}              : the '@' character
+    @{n}              : the new-line character
 "
 
 end
@@ -444,26 +445,32 @@ module Request = struct
     let of_string str = (
         t_of_sexp (Sexplib.Sexp.of_string str)
     )
-    let help = "
-\tSyntax of the expressions:
-\t\t(ids (<id1> <id2> <id3> ...))
-\t\t   -> the items whose ids are <id1>, <id2>, ...
-\t\t(list_and (<expr1> <expr2> ...))
-\t\t   -> logical \"and\" between expressions
-\t\t      (la ...) is a shortcut to (list_and ...)
-\t\t(list_or (<expr1> <expr2> ...))
-\t\t   -> logical \"or\" between expressions
-\t\t      (lo ...) is a shortcut to (list_or ...)
-\t\t(not <expr>)
-\t\t   -> logical negation of an expression
-\t\t(tags (<tag1> <tag2> <tag3>))
-\t\t   -> look for the tags (it is an intersection, an \"and\")
-\t\t(matches (<field> <regexp>))
-\t\t   -> look if you find <regexp> in <field>
-\t\t      example: (matches (title comp[a-z]*))
-\t\t(has <field>)
-\t\t   -> the field is present
-\t\t      functionally equivalent to (matches (<field> \"\"))
+    let help = "\
+Syntax of the '-select' expressions (all parentheses are important):
+    (ids (<id1> <id2> <id3> ...))
+        -> the items whose ids are <id1>, <id2>, ...
+    (list_and (<expr1> <expr2> ...))
+        -> logical \"and\" between expressions
+        (la ...) is a shortcut to (list_and ...)
+    (list_or (<expr1> <expr2> ...))
+        -> logical \"or\" between expressions
+        (lo ...) is a shortcut to (list_or ...)
+    (not <expr>)
+        -> logical negation of an expression
+    (tags (<tag1> <tag2> <tag3>))
+        -> look for the tags (it is an intersection, an \"and\")
+    (matches (<field> <regexp>))
+        -> look if you find <regexp> in <field>
+    (has <field>)
+        -> the field is present
+        functionally equivalent to (matches (<field> \"\"))
+Examples:
+    (lo ((has bibtex) (la ((has id) (has authors) (has title) (has how)))))
+        -> selects entries which have a bibtex field, or at least, enough
+        information to generate a @misc BibTeX entry.
+    (matches (title comp[a-z]*))
+        -> selects entries whose title field exists and matches the regexp
+        (e.g. \"The completion\" matches but \"The comp.\" does not).
 "
 
 end
@@ -482,16 +489,15 @@ let testminimal () = (
 )
 
 let () = (
-    if Sys.argv.(1) = "test" then (
+    (try if Sys.argv.(1) = "test" then (
         testminimal ();
-        exit 0;
-    );
+        exit 0;) with e -> ());
     let do_validate = ref false in
     let read_stdin = ref false in
     let bibtex = ref "" in
     let out_format = ref "" in
     let request = ref "" in
-    let usage = "sebib [OPTIONS] file1.sebib file2.sebib ..." in
+    let usage = "usage: sebib [OPTIONS] file1.sebib file2.sebib ..." in
     let commands = [
         Arg.command
             ~doc:"\n\tValidate the files, continue if OK, exit 2 if not" 
@@ -508,15 +514,29 @@ let () = (
         Arg.command
             ~doc:("<string>\n\
             \tOutput to stdout using the <string> format for each entry\n\
-            \tThe format is:" ^ Format.help)
+            \tsee -help-format")
             "-format"
             (Arg.Set_string out_format);
         Arg.command
             ~doc:("<s-expr>\n\
-            \tFilter the bibliography with a query:" ^ Request.help)
+            \tFilter the bibliography with a query\n\
+            \tsee -help-select")
             "-select"
             (Arg.Set_string request);
+        Arg.command
+            ~doc:("\n\
+            \tHelp about the -format option")
+            "-help-format"
+            (Arg.Unit (fun () -> printf p"%s" Format.help));
+        Arg.command
+            ~doc:("\n\
+            \tHelp about the -select option")
+            "-help-select"
+            (Arg.Unit (fun () -> printf p"%s" Request.help));
     ] in
+    if Array.length Sys.argv = 1 then (
+        printf p"%s\ntry `sebib -help`\n" usage;
+    );
     let files = Arg.handle ~usage commands in
 
     let bibliography_str =

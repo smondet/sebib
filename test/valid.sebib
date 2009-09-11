@@ -15,8 +15,8 @@
         we can enter double quotes: \"
         ")
     (bibtex "
-@inproceedings{1434297,
- author = {Skevik, Karl-Andr\'{e} and Siekkinen, Matti and Goebel, Vera and Plagemann, Thomas},
+@inproceedings{most09complete,
+ author = {Skevik, Karl-Andr\\'{e} and Siekkinen, Matti and Goebel, Vera and Plagemann, Thomas},
  title = {Experiences with Application Development for Autonomic Networks},
  booktitle = {MACE '08: Proceedings of the 3rd IEEE international workshop on Modelling Autonomic Communications Environments},
  year = {2008},
@@ -63,3 +63,13 @@
         (First Family5)
         (First Family6)
     )))
+
+(
+    (id utf8test)
+    (authors (
+        (Jéţø Möûdæ)
+        (Éşçölœ Ñéèßïù)
+    ))
+    (title "A Title with ACRONYM, And uppercase Ütf8, also Löwercæsê")
+    (how "It is F$#@^!|£%king \£aT€X (©), which will nœvør bî üţf8 compliant")
+)

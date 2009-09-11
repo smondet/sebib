@@ -2,6 +2,13 @@ TYPE_CONV_PATH "MainOfSebib"
 
 open Print
 
+open Safe_int (* Removes all polymorphic comparisons*)
+let (==) x y = failwith "Not Physical Equality"
+
+let (=$=) x y = String.compare x y = 0
+let (<$>) x y = String.compare x y <> 0
+
+
 module AuthorList = struct
     type author = string * string with sexp
     type t = author list with sexp
@@ -106,9 +113,10 @@ module Biblio = struct
     )
 
     let set_of_string str = 
-        set_of_sexp (Sexplib.Sexp.of_string ("(" ^ str ^ ")"))
-    let string_of_set set =
-        Sexplib.Sexp.to_string (sexp_of_set set)
+        Sexplib.Sexp.of_string ("(" ^ str ^ ")") |> set_of_sexp
+
+    let string_of_set: set -> string =
+        sexp_of_set |- Sexplib.Sexp.to_string
 
     let find_field (field:field_name) (entry:entry) = (
         let f  = List.Exceptionless.find in
@@ -418,16 +426,16 @@ module Request = struct
         | `matches (f,r) -> 
             let str = Biblio.field_or_empty f entry in
             let rgx = Str.regexp r in
-            (str <> "") &&
+            (str <$> "") &&
             (try Str.search_forward rgx str 0 >= 0 with Not_found -> false)
         | `ids l ->
             let idstr = Biblio.field_or_empty `id entry in
-            List.exists ((=) idstr) l
+            List.exists ((=$=) idstr) l
         | `tags tags_request -> 
             begin match Biblio.find_field `tags entry with
             | Some (`tags tag_list) ->
                 List.for_all
-                    (fun tag -> List.exists ((=) tag) tag_list)
+                    (fun tag -> List.exists ((=$=) tag) tag_list)
                     tags_request
             | _ -> false
             end
@@ -489,7 +497,7 @@ let testminimal () = (
 )
 
 let () = (
-    (try if Sys.argv.(1) = "test" then (
+    (try if Sys.argv.(1) =$= "test" then (
         testminimal ();
         exit 0;) with e -> ());
     let do_validate = ref false in
@@ -549,7 +557,7 @@ let () = (
 
     let biblio = 
         let b = Biblio.set_of_string bibliography_str in
-        if !request = "" then b 
+        if !request =$= "" then b 
         else Request.exec (Request.of_string !request) b in
 
     if !do_validate then (
@@ -571,7 +579,7 @@ let () = (
     end;
 
 
-    if !out_format <> "" then (
+    if !out_format <$> "" then (
         Format.str ~pattern:!out_format biblio |> printf p"%s";
     );
 

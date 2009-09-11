@@ -112,11 +112,32 @@ module Biblio = struct
         | l -> `no l
     )
 
+    let is_bibtexable set = (
+        let has_bibtex =
+            List.exists (function `bibtex _ -> true | _ -> false) in
+        let is_miscable e =
+            (List.exists (function `id _ -> true | _ -> false) e) &&
+            (List.exists (function `title _ -> true | _ -> false) e) &&
+            (* (List.exists (function `authors _ -> true | _ -> false) e) && *)
+            (List.exists (function `how _ -> true | _ -> false) e)
+            (* (List.exists (function `year _ -> true | _ -> false) e) *)
+        in
+        let invalids =
+            List.find_all
+                (fun entry -> not ((has_bibtex entry) || (is_miscable entry)))
+                set in
+        match invalids with
+        | [] -> `yes
+        | l -> `no l
+    )
+
     let set_of_string str = 
         Sexplib.Sexp.of_string ("(" ^ str ^ ")") |> set_of_sexp
 
-    let string_of_set: set -> string =
-        sexp_of_set |- Sexplib.Sexp.to_string
+    let string_of_set set  =
+        let s = sexp_of_set set in 
+        (* Sexplib.Sexp.to_string *)
+        SExpr.to_string_hum ~indent:4 s
 
     let find_field (field:field_name) (entry:entry) = (
         let f  = List.Exceptionless.find in
@@ -496,11 +517,25 @@ let testminimal () = (
     print_string (Sexplib.Sexp.to_string sexp_set);
 )
 
+let perform_validation name condition validation biblio = (
+    if condition then (
+        match validation biblio with
+        | `yes ->
+            (* printf p"Validation: OK\n"; *)
+            ()
+        | `no l ->
+            printf p"%s validation; the following items are wrong:\n%s\n" 
+                name
+                (Biblio.string_of_set l);
+            exit 2;
+    );
+)
 let () = (
     (try if Sys.argv.(1) =$= "test" then (
         testminimal ();
         exit 0;) with e -> ());
     let do_validate = ref false in
+    let do_bibtexable = ref false in
     let read_stdin = ref false in
     let bibtex = ref "" in
     let out_format = ref "" in
@@ -508,9 +543,15 @@ let () = (
     let usage = "usage: sebib [OPTIONS] file1.sebib file2.sebib ..." in
     let commands = [
         Arg.command
-            ~doc:"\n\tValidate the files, continue if OK, exit 2 if not" 
+            ~doc:"\n\tValidate the files, continues if OK, exits(2) if not" 
             "-validate"
             (Arg.Set do_validate);
+        Arg.command
+            ~doc:"\n\tChecks that every entry has either a 'bibtex' field or\n\
+            \tis able to build an acceptable @misc entry (id, title, how),\n\
+            \tcontinues if OK, exits 2 if not" 
+            "-bibtex-able"
+            (Arg.Set do_bibtexable);
         Arg.command
             ~doc:"\n\tAlso use stdin as input" 
             "-stdin"
@@ -560,16 +601,8 @@ let () = (
         if !request =$= "" then b 
         else Request.exec (Request.of_string !request) b in
 
-    if !do_validate then (
-        match Biblio.is_valid biblio with
-        | `yes ->
-            (* printf p"Validation: OK\n"; *)
-            ()
-        | `no l ->
-            printf p"Validation: Following are wrong:\n%s\n" 
-                (Biblio.string_of_set l);
-            exit 2;
-    );
+    perform_validation "Basic" !do_validate  Biblio.is_valid biblio;
+    perform_validation "BbTeX-able" !do_bibtexable  Biblio.is_bibtexable biblio;
 
     begin match !bibtex with
     | "" -> ();

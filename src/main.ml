@@ -3,11 +3,21 @@ TYPE_CONV_PATH "MainOfSebib"
 open Print
 
 open Safe_int (* Removes all polymorphic comparisons*)
-let (==) x y = failwith "Not Physical Equality"
+
+let (==) (x:unit) (y:unit) = ()
 
 let (=$=) x y = String.compare x y = 0
 let (<$>) x y = String.compare x y <> 0
 
+(* Polymorphic equality *)
+let (=@=) x y = Standard.compare x y = 0
+let (<@>) x y = Standard.compare x y <> 0
+
+module LL = struct
+    include List
+    include List.Labels
+    include List.Labels.LExceptionless
+end
 
 module AuthorList = struct
     type author = string * string with sexp
@@ -504,6 +514,148 @@ Examples:
 
 end
 
+module WebGet = struct
+
+    let make_sockaddr addr port = (
+        let inet_addr = (Unix.gethostbyname addr).Unix.h_addr_list.(0) in
+        Unix.ADDR_INET (inet_addr, port)
+    )
+    let http_get path host = (
+        let get = sprintf p"GET %s HTTP/1.0\r\nHost: %s\r\n\r\n" path host in
+        (* printf p"REQ: %s\n%!" get; *)
+        let fi, fo =
+            Unix.open_connection ~autoclose:false (make_sockaddr host 80) in
+        (* printf p"Connection openned\n%!"; *)
+        output_string fo get;
+        flush fo;
+        (* printf p"Req sent\n%!"; *)
+        let r = (IO.read_all fi) in
+        close_in fi;
+        (* Unix.shutdown_connection fi; *)
+        (* close_out fo; -> is the same FD !! *)
+        r
+    )
+
+    let try_find ?err_msg regexp str = (
+        match get (Str.search regexp str) with
+        | None ->
+            failwith (Option.default "`try_find regexp str` failed" err_msg)
+        | Some (_, _, s) ->
+            s
+    )
+
+    let from_PubZone id = (
+        let pz_host = "www.pubzone.org" in
+        let pz_path =
+            sprintf 
+                p"/pages/publications/showPublication.do?publicationId=%s" id
+        in
+        let response = http_get pz_path pz_host in
+        (* printf p"%s\n" response; *)
+        let rgx_dblp_url =
+            Str.regexp
+                "\\(http://dblp.uni-trier.de/\\)db/\
+                \\([a-zA-Z/0-9]*\\)/[a-zA-Z0-9]+\\.html#\\([a-zA-Z/0-9]*\\)" in
+        let dblp_url =
+            try_find rgx_dblp_url response
+                ~err_msg:"ERROR: Didn't find the DBLP URL in response" in
+        (* printf p"MATCH: %s\n" dblp_url; *)
+        let bibtex_path = 
+            Str.global_replace rgx_dblp_url "/rec/bibtex/\\2/\\3" dblp_url in
+        (* printf p"REPLACED: %s\n" bibtex_path; *)
+        let bibtex_page = http_get bibtex_path "dblp.uni-trier.de" in
+        (* printf p"BIBTEX PAGE: %-20s...\n" bibtex_page; *)
+        let type_rgx = Str.regexp "<pre>\\(@[a-z]+\\){" in
+        let bibtex_type =
+            let catched =
+                try_find type_rgx bibtex_page
+                    ~err_msg:"ERROR: Didn't find BibTeX entry type" in
+            String.sub catched 5 (String.length catched - 5) in
+        (* printf p"BIBTEX TYPE: %s\n" bibtex_type; *)
+        let bibtex_rest_rgx = 
+            Str.regexp "author[ \t]*=[^<]*</pre>" in
+        let bibtex_entry =
+            let catched =
+                try_find bibtex_rest_rgx bibtex_page
+                    ~err_msg:"ERROR: Didn't find the contents of the\
+                        BibTeX entry" in
+            String.sub catched 0 (String.length catched - 6) in
+        (* printf p"BIBTEX ENTRY: %s\n" bibtex_entry; *)
+        
+        let dblp_xml_path = bibtex_path ^ ".xml" in
+        let xml_record =
+            open String in
+            let got = http_get dblp_xml_path "dblp.uni-trier.de" in
+            let first = find got "<?xml" in
+            sub got first (length got - first)
+        in
+        (* printf p"XML: %s\n" xml_record; *)
+        let (authors, title, year, doi) =
+            let clean_pcdata =
+                let entity_rgx = Str.regexp "&#[0-9]+;" in
+                let replace str =
+                    let code = 
+                        int_of_string
+                            (String.sub str 2 (String.length str - 3)) in
+                        UChar.chr code |> UTF8.of_char |> UTF8.to_string in
+                (fun str ->
+                    String.concat ""
+                        (List.map (function
+                            | Str.Text t -> t
+                            | Str.Delim s -> replace s)
+                            (Str.full_split entity_rgx str)))
+            in
+            let authors = ref [] in
+            let title = ref "" in
+            let year = ref "" in
+            let doi = ref "" in
+            open Xml in
+            let ixml = parse_string xml_record in
+            (* printf p"TAG: %S\n" (tag ixml); *)
+            LL.iter (children (List.hd (children ixml))) ~f:(fun xml ->
+                match tag xml with
+                | "author" ->
+                    let totalname =
+                        pcdata (List.hd (children xml)) |>clean_pcdata in
+                    authors := (String.rsplit totalname " ") :: !authors;
+                | "title" ->
+                    title := pcdata (List.hd (children xml)) |>clean_pcdata
+                | "ee" ->
+                    doi := pcdata (List.hd (children xml)) |>clean_pcdata
+                | "year" ->
+                    year := pcdata (List.hd (children xml)) |>clean_pcdata
+                | _ -> ()
+            );
+            (LL.rev !authors, !title, int_of_string !year, !doi)
+        in
+        let id = 
+            let name = (String.lowercase (snd (List.hd authors))) in
+            let t =
+                let lowtitle = String.lowercase title in
+                let rec get_first str =
+                    let word, rest = String.split str " " in
+                    match word with
+                    | "the" | "a" | "it" | "is" ->
+                        get_first rest 
+                    | s -> s
+                in
+                String.replace_chars (function
+                    | 'a' .. 'z' as a -> string_of_char a
+                    | _ -> "") 
+                    (get_first lowtitle)
+            in
+            sprintf p"%s%d%s" name year t
+        in
+        [   (`id id);
+            (`authors authors);
+            (`title title);
+            (`year year);
+            (`url (sprintf p"http://%s%s" pz_host pz_path));
+            (`doi doi);
+            (`bibtex (sprintf p"%s%s,\n%s" bibtex_type id bibtex_entry))]
+    )
+
+end
 
 
 let testminimal () = (
@@ -515,6 +667,8 @@ let testminimal () = (
             [`id "brout"; `how "Butterfly effect on processors"]
         ] in
     print_string (Sexplib.Sexp.to_string sexp_set);
+    let mondet08streaming = WebGet.from_PubZone "504967" in
+    printf p"testminimal : %s\n%!" (Biblio.string_of_set [mondet08streaming]);
 )
 
 let perform_validation name condition validation biblio = (
@@ -531,15 +685,17 @@ let perform_validation name condition validation biblio = (
     );
 )
 let () = (
-    (try if Sys.argv.(1) =$= "test" then (
+    if (try Sys.argv.(1) =$= "test" with e -> false) then (
         testminimal ();
-        exit 0;) with e -> ());
+        exit 30;
+    );
     let do_validate = ref false in
     let do_bibtexable = ref false in
     let read_stdin = ref false in
     let bibtex = ref "" in
     let out_format = ref "" in
     let request = ref "" in
+    let pubzone = ref [] in
     let usage = "usage: sebib [OPTIONS] file1.sebib file2.sebib ..." in
     let commands = [
         Arg.command
@@ -572,6 +728,14 @@ let () = (
             \tsee -help-select")
             "-select"
             (Arg.Set_string request);
+        Arg.command
+            ~doc:("<pub-id>\n\
+            \tAtempt to get information from pubzone.org \
+            (Experimental feature).\n\
+            \tThe <pub-id> can be obtained from the URL, e.g. \
+            \"?publicationId=1234388\"")
+            "-pubzone"
+            (Arg.String (fun s -> pubzone := s :: !pubzone));
         Arg.command
             ~doc:("\n\
             \tHelp about the -format option")
@@ -611,6 +775,11 @@ let () = (
         File.with_file_out f (fun o -> fprintf o p"%s" (BibTeX.str biblio));
     end;
 
+    if !pubzone <@> [] then (
+        let entries = LL.rev_map !pubzone ~f:WebGet.from_PubZone in 
+        let sexpr = (Biblio.string_of_set entries) in
+        String.sub sexpr 1 (String.length sexpr - 2) |> print_string
+    );
 
     if !out_format <$> "" then (
         Format.str ~pattern:!out_format biblio |> printf p"%s";

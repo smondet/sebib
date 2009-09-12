@@ -73,3 +73,15 @@
     (title "A Title with ACRONYM, And uppercase Ütf8, also Löwercæsê")
     (how "It is F$#@^!|£%king \£aT€X (©), which will nœvør bî üţf8 compliant")
 )
+
+
+((id mondet2008streaming)
+     (authors
+         ((Sebastien Mondet) (Wei Cheng) ("G&#233;raldine" Morin)
+             (Romulus Grigoras) ("Fr&#233;d&#233;ric" Boudon)
+             ("Wei Tsang" Ooi)))
+     (title "Streaming of plants in distributed virtual environments.")
+     (year 2008) (doi http://doi.acm.org/10.1145/1459359.1459361)
+     (bibtex
+         "@inproceedings{mondet2008streaming,\nauthor    = {Sebastien Mondet and\n               Wei Cheng and\n               G{\\'e}raldine Morin and\n               Romulus Grigoras and\n               Fr{\\'e}d{\\'e}ric Boudon and\n               Wei Tsang Ooi},\n  title     = {Streaming of plants in distributed virtual environments},\n  booktitle = {ACM Multimedia},\n  year      = {2008},\n  pages     = {1-10},\n  ee        = {http://doi.acm.org/10.1145/1459359.1459361},\n  crossref  = {DBLP:conf/mm/2008},\n  bibsource = {DBLP, http://dblp.uni-trier.de}\n}\n"))
+

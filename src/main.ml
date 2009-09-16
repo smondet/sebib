@@ -355,86 +355,6 @@ module BibTeX = struct
     )
 end
 
-module Format = struct
-
-
-
-    let str ~pattern set = (
-        let rgx = Str.regexp "@{[a-z-@]+}" in
-        let strfield = Biblio.field_or_empty in
-        let subs entry = function
-            | "@{id}" -> strfield `id entry
-            | "@{authors}" -> strfield `authors entry
-            | "@{authors-and}" ->
-                strfield ~authors_style:`comas_and `authors entry
-            | "@{authors-bibtex}" ->
-                strfield ~authors_style:`bibtex `authors entry
-            | "@{authors-acm}" ->
-                strfield ~authors_style:`acm `authors entry
-            | "@{authors-etal}" ->
-                strfield ~authors_style:`et_al `authors entry
-            | "@{title}" -> strfield `title entry
-            | "@{how}" -> strfield `how entry
-            | "@{year}" -> strfield `year entry
-            | "@{note}" -> strfield `note entry
-            | "@{date}"     -> strfield `date      entry
-            | "@{url}"      -> strfield `url       entry
-            | "@{pdfurl}"   -> strfield `pdfurl    entry
-            | "@{comments}" -> strfield `comments  entry
-            | "@{bibtex}"   -> BibTeX.format_entry entry
-            | "@{abstract}" -> strfield `abstract  entry
-            | "@{doi}"      -> strfield `doi       entry
-            | "@{citation}" -> strfield `citation  entry
-            | "@{tags}"     -> strfield `tags      entry
-            | "@{keywords}" -> strfield `keywords  entry
-            | "@{more}"     -> strfield `more      entry
-            | "@{@}" -> "@"
-            | "@{n}" -> "\n"
-            | s -> s
-        in
-        String.concat ""
-            (List.concat (List.map (fun entry ->
-                List.map (function
-                    | Str.Text t -> t
-                    | Str.Delim s -> subs entry s)
-                    (Str.full_split rgx pattern)) set))
-    )
-
-    let help = "\
-The format is a string with special patterns:
-    @{id}             : id
-    @{authors}        : authors (coma separated list)
-    @{authors-and}    : authors (comas and a 'and' for the last one
-    @{authors-bibtex} : authors (BibTeX friendly format)
-    @{authors-acm}    : authors (like ACM Ref, with initials)
-    @{authors-etal}   : authors 
-                        (Depending on the number of authors:
-                            1: Lastname
-                            2: Lastname1 and Lastname2
-                            more: Lastname1 et al.)
-    @{title}          : title
-    @{how}            : how
-    @{year}           : year
-    @{note}           : note
-    @{date}           : date
-    @{url}            : url
-    @{pdfurl}         : pdfurl
-    @{comments}       : comments
-    @{bibtex}         : The (maybe generated) BibTeX entry
-                        (if there's no `bibtex' field, the entry is generated,
-                        like for the '-bibtex' option)
-    @{abstract}       : abstract
-    @{doi}            : doi
-    @{citation}       : citation
-    @{tags}           : tags (coma separated list)
-    @{keywords}       : keywords (coma separated list)
-    @{more}           : more
-    @{@}              : the '@' character
-    @{n}              : the new-line character
-"
-
-end
-
 module Request = struct
 
     type t = [
@@ -513,6 +433,85 @@ Examples:
 "
 
 end
+
+module Format = struct
+
+    let str ~pattern set = (
+        let rgx = Str.regexp "@{[a-z-@]+}" in
+        let strfield = Biblio.field_or_empty in
+        let subs entry = function
+            | "@{id}" -> strfield `id entry
+            | "@{authors}" -> strfield `authors entry
+            | "@{authors-and}" ->
+                strfield ~authors_style:`comas_and `authors entry
+            | "@{authors-bibtex}" ->
+                strfield ~authors_style:`bibtex `authors entry
+            | "@{authors-acm}" ->
+                strfield ~authors_style:`acm `authors entry
+            | "@{authors-etal}" ->
+                strfield ~authors_style:`et_al `authors entry
+            | "@{title}" -> strfield `title entry
+            | "@{how}" -> strfield `how entry
+            | "@{year}" -> strfield `year entry
+            | "@{note}" -> strfield `note entry
+            | "@{date}"     -> strfield `date      entry
+            | "@{url}"      -> strfield `url       entry
+            | "@{pdfurl}"   -> strfield `pdfurl    entry
+            | "@{comments}" -> strfield `comments  entry
+            | "@{bibtex}"   -> BibTeX.format_entry entry
+            | "@{abstract}" -> strfield `abstract  entry
+            | "@{doi}"      -> strfield `doi       entry
+            | "@{citation}" -> strfield `citation  entry
+            | "@{tags}"     -> strfield `tags      entry
+            | "@{keywords}" -> strfield `keywords  entry
+            | "@{more}"     -> strfield `more      entry
+            | "@{@}" -> "@"
+            | "@{n}" -> "\n"
+            | s -> s
+        in
+        String.concat ""
+            (List.concat (List.map (fun entry ->
+                List.map (function
+                    | Str.Text t -> t
+                    | Str.Delim s -> subs entry s)
+                    (Str.full_split rgx pattern)) set))
+    )
+
+    let help = "\
+The format is a string with special patterns:
+    @{id}             : id
+    @{authors}        : authors (coma separated list)
+    @{authors-and}    : authors (comas and a 'and' for the last one
+    @{authors-bibtex} : authors (BibTeX friendly format)
+    @{authors-acm}    : authors (like ACM Ref, with initials)
+    @{authors-etal}   : authors 
+                        (Depending on the number of authors:
+                            1: Lastname
+                            2: Lastname1 and Lastname2
+                            more: Lastname1 et al.)
+    @{title}          : title
+    @{how}            : how
+    @{year}           : year
+    @{note}           : note
+    @{date}           : date
+    @{url}            : url
+    @{pdfurl}         : pdfurl
+    @{comments}       : comments
+    @{bibtex}         : The (maybe generated) BibTeX entry
+                        (if there's no `bibtex' field, the entry is generated,
+                        like for the '-bibtex' option)
+    @{abstract}       : abstract
+    @{doi}            : doi
+    @{citation}       : citation
+    @{tags}           : tags (coma separated list)
+    @{keywords}       : keywords (coma separated list)
+    @{more}           : more
+    @{@}              : the '@' character
+    @{n}              : the new-line character
+"
+
+end
+
 
 module WebGet = struct
 

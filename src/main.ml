@@ -704,7 +704,7 @@ let testminimal () = (
     printf p"testminimal : %s\n%!" (Biblio.string_of_set [mondet08streaming]);
 )
 
-let perform_validation name condition validation biblio = (
+let perform_validation name condition validation biblio errcode = (
     if condition then (
         match validation biblio with
         | `yes ->
@@ -714,7 +714,7 @@ let perform_validation name condition validation biblio = (
             printf p"%s validation; the following items are wrong:\n%s\n" 
                 name
                 (Biblio.string_of_set l);
-            exit 2;
+            exit errcode;
     );
 )
 let () = (
@@ -738,7 +738,7 @@ let () = (
         Arg.command
             ~doc:"\n\tChecks that every entry has either a 'bibtex' field or\n\
             \tis able to build an acceptable @misc entry (id, title, how),\n\
-            \tcontinues if OK, exits 2 if not" 
+            \tcontinues if OK, exits(3) if not" 
             "-bibtex-able"
             (Arg.Set do_bibtexable);
         Arg.command
@@ -803,8 +803,8 @@ let () = (
         if !request =$= "" then b 
         else Request.exec (Request.of_string !request) b in
 
-    perform_validation "Basic" !do_validate  Biblio.is_valid biblio;
-    perform_validation "BbTeX-able" !do_bibtexable  Biblio.is_bibtexable biblio;
+    perform_validation "Basic" !do_validate  Biblio.is_valid biblio 2;
+    perform_validation "BbTeX-able" !do_bibtexable  Biblio.is_bibtexable biblio 3;
 
     begin match !bibtex with
     | "" -> ();

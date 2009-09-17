@@ -756,6 +756,11 @@ let () = (
             "-format"
             (Arg.Set_string out_format);
         Arg.command
+            ~doc:"\n\
+            \tThis is a convenience shortcut for -format \"@{id} \""
+            "-ids"
+            (Arg.Unit (fun () -> out_format := "@{id} "));
+        Arg.command
             ~doc:("<s-expr>\n\
             \tFilter the bibliography with a query\n\
             \tsee -help-select")

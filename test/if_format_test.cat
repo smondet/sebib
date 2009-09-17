@@ -1,0 +1,4 @@
+@{id} @{if (has tags)} TAGS @{else} NOTAGS @{endif}
+@{if (not (has id))} @{if (has id)} TESTFAILED @{else} TESTFAILEDTOO @{endif}
+@{else} SHOULDBETHERE @{if (has tags)} TAGS @{else} NOTAGS @{endif}
+@{endif}

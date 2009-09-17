@@ -437,43 +437,73 @@ end
 module Format = struct
 
     let str ~pattern set = (
-        let rgx = Str.regexp "@{[a-z-@]+}" in
+        let rgx = Str.regexp "@{[^}]+}" in
         let strfield = Biblio.field_or_empty in
-        let subs entry = function
-            | "@{id}" -> strfield `id entry
-            | "@{authors}" -> strfield `authors entry
-            | "@{authors-and}" ->
-                strfield ~authors_style:`comas_and `authors entry
-            | "@{authors-bibtex}" ->
-                strfield ~authors_style:`bibtex `authors entry
-            | "@{authors-acm}" ->
-                strfield ~authors_style:`acm `authors entry
-            | "@{authors-etal}" ->
-                strfield ~authors_style:`et_al `authors entry
-            | "@{title}" -> strfield `title entry
-            | "@{how}" -> strfield `how entry
-            | "@{year}" -> strfield `year entry
-            | "@{note}" -> strfield `note entry
-            | "@{date}"     -> strfield `date      entry
-            | "@{url}"      -> strfield `url       entry
-            | "@{pdfurl}"   -> strfield `pdfurl    entry
-            | "@{comments}" -> strfield `comments  entry
-            | "@{bibtex}"   -> BibTeX.format_entry entry
-            | "@{abstract}" -> strfield `abstract  entry
-            | "@{doi}"      -> strfield `doi       entry
-            | "@{citation}" -> strfield `citation  entry
-            | "@{tags}"     -> strfield `tags      entry
-            | "@{keywords}" -> strfield `keywords  entry
-            | "@{more}"     -> strfield `more      entry
-            | "@{@}" -> "@"
-            | "@{n}" -> "\n"
-            | s -> s
+        let sub_eq s i o m =
+            if String.length s < o + i then
+                false
+            else
+                (String.sub s i o =$= m) in
+        let is_write stack =
+            Stack.is_empty stack || Stack.top stack =@= `write in
+        let subs stack entry = function
+            | "@{id}" when is_write stack ->  strfield `id entry
+            | "@{authors}" when is_write stack -> strfield `authors entry
+            | "@{authors-and}" when is_write stack ->
+                    strfield ~authors_style:`comas_and `authors entry 
+            | "@{authors-bibtex}" when is_write stack ->
+                    strfield ~authors_style:`bibtex `authors entry 
+            | "@{authors-acm}" when is_write stack -> 
+                    strfield ~authors_style:`acm `authors entry 
+            | "@{authors-etal}" when is_write stack -> 
+                    strfield ~authors_style:`et_al `authors entry 
+            | "@{title}" when is_write stack -> strfield `title entry 
+            | "@{how}" when is_write stack -> strfield `how entry 
+            | "@{year}" when is_write stack -> strfield `year entry 
+            | "@{date}"     when is_write stack -> strfield `date      entry 
+            | "@{url}"      when is_write stack -> strfield `url       entry 
+            | "@{pdfurl}"   when is_write stack -> strfield `pdfurl    entry 
+            | "@{comments}" when is_write stack -> strfield `comments  entry 
+            | "@{bibtex}"   when is_write stack -> BibTeX.format_entry entry 
+            | "@{abstract}" when is_write stack -> strfield `abstract  entry 
+            | "@{doi}"      when is_write stack -> strfield `doi       entry 
+            | "@{citation}" when is_write stack -> strfield `citation  entry 
+            | "@{tags}"     when is_write stack -> strfield `tags      entry 
+            | "@{keywords}" when is_write stack -> strfield `keywords  entry 
+            | "@{more}"     when is_write stack -> strfield `more      entry 
+            | "@{@}" when is_write stack -> "@" 
+            | "@{n}" when is_write stack -> "\n" 
+            | s when sub_eq s 0 4 "@{if" ->
+                open String in
+                let lgth = length s in
+                let expr = Request.of_string (sub s 4 (lgth - 5)) in
+                begin match is_write stack, Request.is_ok entry expr with
+                | true, true -> Stack.push `write stack
+                | true, false -> Stack.push `no_write stack
+                | false, _ -> Stack.push `silent stack
+                end;
+                ""
+            | "@{else}" -> 
+                begin try
+                    match Stack.pop stack with
+                    | `write -> Stack.push `no_write stack; ""
+                    | `no_write -> Stack.push `write stack; ""
+                    | `silent -> Stack.push `silent stack ; ""
+                with e -> failwith "@{else} does not match any @{if ...}"
+                end
+            | "@{endif}" ->
+                begin try
+                    let _ =  Stack.pop stack in ""
+                with e -> failwith "@{endif} does not match any @{if ...}"
+                end
+            | s -> if is_write stack then s else ""
         in
         String.concat ""
             (List.concat (List.map (fun entry ->
+                let stack = Stack.create () in
                 List.map (function
-                    | Str.Text t -> t
-                    | Str.Delim s -> subs entry s)
+                    | Str.Text t -> if is_write stack then t else ""
+                    | Str.Delim s -> subs stack entry s)
                     (Str.full_split rgx pattern)) set))
     )
 
@@ -508,6 +538,10 @@ The format is a string with special patterns:
     @{more}           : more
     @{@}              : the '@' character
     @{n}              : the new-line character
+    @{if <expr>} AAA @{else} BBB @{endif} :
+               Evaluates <expr> for the entry,
+               if true, displays AAA, if not, BBB.
+               (<expr> uses the same syntax as -select, see -help-select)
 "
 
 end

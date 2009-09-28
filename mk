@@ -1,20 +1,38 @@
 #! /bin/sh
 
-GODI_PATH=$HOME/usr/godi311
-export PATH=$GODI_PATH/bin:$GODI_PATH/sbin:$PATH;
-export MANPATH=$GODI_PATH/man:$MANPATH
+build ()
+{
+    local TAGOPT="-tags pkg_xml-light,pkg_sexplib.syntax"
 
-prepro() {
-    local T=_build/$1
-    mkdir -p `dirname $T`
-    sed -e 's/##.*$//' $1 > $T
-    echo $T
+    local I_OPT="-I src/app -I src/lib"
+    local FLAGS="-cflags -dtypes "
+    local ALL_FLAGS="$I_OPT $TAGOPT $BRTXOPT $FLAGS"
+    local TARGETS="src/app/sebib_main$1.byte libsebib.cma"
+    ocamlfind batteries/ocamlbuild $ALL_FLAGS $TARGETS
+    rm -f sebib && ln -s sebib_main$1.byte sebib
 }
-SOURCES="src/main.ml"
-for i in $SOURCES ; do prepro $i ; done;
-cd _build
-ocamlfind batteries/ocamlc -g -package xml-light,sexplib.syntax -dtypes \
-    -o ../sebib $SOURCES
-cd ..
 
+echo_help ()
+{
+    echo "\
+$0 <cmd>
+b: Build all (default action)
+bg: Build all with debug symbols
+c: Clean
+h: This help"
+}
 
+if [ $# -eq 0 ]; then
+    build
+    exit $?
+fi
+
+for todo in $* ; do
+    case "$todo" in
+        "b" ) build ;;
+        "bg" ) build ".d" ;;
+        "c" ) ocamlbuild -clean ;;
+        "h" ) echo_help ;;
+        * ) echo "see \`mk h\`";;
+    esac
+done

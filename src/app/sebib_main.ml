@@ -1,6 +1,6 @@
 
 open Sebib
-open Print
+open Sebib_std
 
 let testminimal () = (
     let sexp_set =
@@ -125,7 +125,7 @@ let () = (
     end;
 
     if !pubzone <@> [] then (
-        let entries = LL.rev_map !pubzone ~f:WebGet.from_PubZone in 
+        let entries = Ls.rev_map !pubzone ~f:WebGet.from_PubZone in 
         let sexpr = (Biblio.string_of_set entries) in
         String.sub sexpr 1 (String.length sexpr - 2) |> print_string
     );

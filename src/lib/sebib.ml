@@ -1,23 +1,7 @@
 TYPE_CONV_PATH "Sebib"
 
-open Print
+open Sebib_std
 
-open Safe_int (* Removes all polymorphic comparisons*)
-
-let (==) (x:unit) (y:unit) = ()
-
-let (=$=) x y = String.compare x y = 0
-let (<$>) x y = String.compare x y <> 0
-
-(* Polymorphic equality *)
-let (=@=) x y = Standard.compare x y = 0
-let (<@>) x y = Standard.compare x y <> 0
-
-module LL = struct
-    include List
-    include List.Labels
-    include List.Labels.LExceptionless
-end
 
 module AuthorList = struct
     type author = string * string with sexp
@@ -645,7 +629,7 @@ module WebGet = struct
             open Xml in
             let ixml = parse_string xml_record in
             (* printf p"TAG: %S\n" (tag ixml); *)
-            LL.iter (children (List.hd (children ixml))) ~f:(fun xml ->
+            Ls.iter (children (List.hd (children ixml))) ~f:(fun xml ->
                 match tag xml with
                 | "author" ->
                     let totalname =
@@ -659,7 +643,7 @@ module WebGet = struct
                     year := pcdata (List.hd (children xml)) |>clean_pcdata
                 | _ -> ()
             );
-            (LL.rev !authors, !title, int_of_string !year, !doi)
+            (Ls.rev !authors, !title, int_of_string !year, !doi)
         in
         let id = 
             let name = (String.lowercase (snd (List.hd authors))) in

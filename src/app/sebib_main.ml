@@ -95,6 +95,11 @@ let () = (
             \tHelp about the -select option")
             "-help-select"
             (Arg.Unit (fun () -> printf p"%s" Request.help));
+        Arg.command
+            ~doc:("\n\
+            \tPrint version")
+            "-version"
+            (Arg.Unit (fun () -> printf p"%s\n" Info.version_string));
     ] in
     if Array.length Sys.argv = 1 then (
         printf p"%s\ntry `sebib -help`\n" usage;

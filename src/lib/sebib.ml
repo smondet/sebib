@@ -2,6 +2,11 @@ TYPE_CONV_PATH "Sebib"
 
 open Sebib_std
 
+module Info = struct
+    let version = "0"
+    let version_string = sprintf p"SeBib v. %s" version
+
+end
 
 module AuthorList = struct
     type author = string * string with sexp

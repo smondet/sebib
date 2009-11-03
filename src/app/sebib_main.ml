@@ -42,6 +42,7 @@ let () = (
     let pubzone = ref [] in
     let usage = "usage: sebib [OPTIONS] file1.sebib file2.sebib ..." in
     let sort_by = ref "" in
+    let output_sebib = ref "" in
     let commands = [
         Arg.command
             ~doc:"\n\tValidate the files, continues if OK, exits(2) if not" 
@@ -61,6 +62,10 @@ let () = (
             ~doc:"<file>\n\tOutput a BibTeX file (- for stdout)" 
             "-bibtex"
             (Arg.Set_string bibtex);
+        Arg.command
+            ~doc:"<file>\n\tOutput a Sebib file (- for stdout)" 
+            "-sebib"
+            (Arg.Set_string output_sebib);
         Arg.command
             ~doc:("<string>\n\
             \tOutput to stdout using the <string> format for each entry\n\
@@ -142,6 +147,18 @@ let () = (
     | f -> 
         File.with_file_out f (fun o -> fprintf o p"%s" (BibTeX.str biblio));
     end;
+    begin match !output_sebib with
+    | "" -> ();
+    | "-" ->
+        let sexpr = (Biblio.string_of_set biblio) in
+        String.sub sexpr 1 (String.length sexpr - 2) |> print_string
+    | f -> 
+        File.with_file_out f (fun o ->
+            let sexpr = (Biblio.string_of_set biblio) in
+            String.sub sexpr 1 (String.length sexpr - 2) |> 
+                (fprintf o p"%s") );
+    end;
+
 
     if !pubzone <@> [] then (
         let entries = Ls.rev_map !pubzone ~f:WebGet.from_PubZone in 

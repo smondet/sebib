@@ -181,6 +181,35 @@ module Biblio = struct
         | Some (`keywords  l) -> String.concat ", " l
         | Some (`more      s) -> s
         | _ -> ""
+
+    let field_name_of_string = function
+        | "id" -> `id 
+        | "authors" -> `authors 
+        | "title" -> `title 
+        | "how" -> `how 
+        | "date" -> `date 
+        | "year" -> `year 
+        | "url" -> `url 
+        | "pdfurl" -> `pdfurl 
+        | "comments" -> `comments 
+        | "bibtex" -> `bibtex 
+        | "note" -> `note 
+        | "abstract" -> `abstract 
+        | "doi" -> `doi 
+        | "citation" -> `citation 
+        | "tags" -> `tags 
+        | "keywords" -> `keywords 
+        | "more" -> `more
+        | s -> failwith ("field name unrecognizable: " ^ s)
+
+    let sort ?(by=`id) bibset = 
+        let cmp ea eb =
+            let authors_style = `acm in
+            String.compare
+                (field_or_empty ~authors_style by ea)
+                (field_or_empty ~authors_style by eb) in
+        Ls.sort ~cmp bibset
+
 end
 
 module BibTeX = struct
@@ -344,6 +373,7 @@ module BibTeX = struct
     )
 end
 
+(** The "-select" domain specific language *)
 module Request = struct
 
     type t = [

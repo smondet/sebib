@@ -41,6 +41,7 @@ let () = (
     let request = ref "" in
     let pubzone = ref [] in
     let usage = "usage: sebib [OPTIONS] file1.sebib file2.sebib ..." in
+    let sort_by = ref "" in
     let commands = [
         Arg.command
             ~doc:"\n\tValidate the files, continues if OK, exits(2) if not" 
@@ -77,6 +78,11 @@ let () = (
             \tsee -help-select")
             "-select"
             (Arg.Set_string request);
+        Arg.command
+            ~doc:("<field>\n\
+            \tSort the bibliography following alphabetical order on a given field")
+            "-sort"
+            (Arg.Set_string sort_by);
         Arg.command
             ~doc:("<pub-id>\n\
             \tAtempt to get information from pubzone.org \
@@ -116,8 +122,16 @@ let () = (
 
     let biblio = 
         let b = Biblio.set_of_string bibliography_str in
-        if !request =$= "" then b 
-        else Request.exec (Request.of_string !request) b in
+        let filtered =
+            if !request =$= "" then b 
+            else Request.exec (Request.of_string !request) b in
+        let sorted =
+            if !sort_by =$= "" then filtered
+            else (
+                let by = (Biblio.field_name_of_string !sort_by) in
+                Biblio.sort ~by filtered
+            ) in
+        sorted in
 
     perform_validation "Basic" !do_validate  Biblio.is_valid biblio 2;
     perform_validation "BbTeX-able" !do_bibtexable  Biblio.is_bibtexable biblio 3;

@@ -446,7 +446,7 @@ Examples:
     (lo ((has bibtex) (la ((has id) (has authors) (has title) (has how)))))
         -> selects entries which have a bibtex field, or at least, enough
         information to generate a @misc BibTeX entry.
-    (matches (title comp[a-z]*))
+    (matches (title comp[a-z]+))
         -> selects entries whose title field exists and matches the regexp
         (e.g. \"The completion\" matches but \"The comp.\" does not).
 "
@@ -530,7 +530,7 @@ module Format = struct
 The format is a string with special patterns:
     @{id}             : id
     @{authors}        : authors (coma separated list)
-    @{authors-and}    : authors (comas and a 'and' for the last one
+    @{authors-and}    : authors (comas and a 'and' for the last one)
     @{authors-bibtex} : authors (BibTeX friendly format)
     @{authors-acm}    : authors (like ACM Ref, with initials)
     @{authors-etal}   : authors 
@@ -560,7 +560,8 @@ The format is a string with special patterns:
     @{if <expr>} AAA @{else} BBB @{endif} :
                Evaluates <expr> for the entry,
                if true, displays AAA, if not, BBB.
-               (<expr> uses the same syntax as -select, see -help-select)
+               (<expr> uses the same syntax as the '-select' option, 
+               see 'sebib -help-select')
 "
 
 end

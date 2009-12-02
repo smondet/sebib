@@ -17,13 +17,13 @@ build ()
             APPEXT="d.byte"
             ;;
     esac
-    local TAGOPT="-tags pkg_xml-light,pkg_sexplib.syntax"
+    local TAGOPT="-tags pkg_xml-light,pkg_sexplib.syntax,pkg_sexplib"
 
     local I_OPT="-I src/app -I src/lib"
     local FLAGS="-cflags -dtypes "
     local ALL_FLAGS="$I_OPT $TAGOPT $BRTXOPT $FLAGS"
     local TARGETS="src/app/sebib_main.$APPEXT" # libsebib.$LIBEXT"
-    ocamlfind batteries/ocamlbuild $ALL_FLAGS -tag really_link $TARGETS
+    ocamlbuild $ALL_FLAGS -tag really_link $TARGETS
     local dir=_build/src/lib/
     local LIB_FILES="$dir/sebib_std.$CMEXT $dir/sebib.$CMEXT "
     $MKLIB -o _build/src/lib/libsebib.$LIBEXT $LIB_FILES

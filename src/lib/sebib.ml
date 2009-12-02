@@ -4,7 +4,7 @@ open Sebib_std
 
 module Info = struct
     let version = "0"
-    let version_string = sprintf p"SeBib v. %s" version
+    let version_string = sprintf "SeBib v. %s" version
 
 end
 
@@ -19,18 +19,18 @@ module AuthorList = struct
         | `bibtex ->
             String.concat " and "
                 (List.map (fun (first, last) ->
-                    sprintf p"%s, %s" last first) authors)
+                    sprintf "%s, %s" last first) authors)
         | `comas_and ->
             let lgth = List.length authors in
             String.concat ", "
                 (List.mapi (fun i (first, last) ->
                     let strand =
                         if i = lgth - 1 && i <> 0 then "and " else "" in
-                    sprintf p"%s%s %s" strand first last) authors)
+                    sprintf "%s%s %s" strand first last) authors)
         | `comas -> 
             String.concat ", "
                 (List.map (fun (first, last) ->
-                    sprintf p"%s %s" first last) authors)
+                    sprintf "%s %s" first last) authors)
         | `acm -> 
             let lgth = List.length authors in
             String.concat ", "
@@ -40,12 +40,12 @@ module AuthorList = struct
                     let initial =
                         if String.length first = 0 
                         then '_' else first.[0] in
-                    sprintf p"%s%s, %c." strand last initial) authors)
+                    sprintf "%s%s, %c." strand last initial) authors)
         | `et_al ->
             match authors with
             | [] -> ""
             | [(onef,onel)] -> onel
-            | [(onef,onel); (twof,twol) ] -> sprintf p"%s and %s" onel twol
+            | [(onef,onel); (twof,twol) ] -> sprintf "%s and %s" onel twol
             | (onef,onel) :: l -> onel ^ "et al."
 
     )
@@ -353,7 +353,7 @@ module BibTeX = struct
             let rgx = Str.regexp "^[ ]*" in
             Str.global_replace rgx "" b
         | _ ->
-            sprintf p"@misc{%s,\n\
+            sprintf "@misc{%s,\n\
                 author = {%s},\n\
                 title = {%s},\n\
                 howpublished = {%s},\n\
@@ -574,14 +574,14 @@ module WebGet = struct
         Unix.ADDR_INET (inet_addr, port)
     )
     let http_get path host = (
-        let get = sprintf p"GET %s HTTP/1.0\r\nHost: %s\r\n\r\n" path host in
-        (* printf p"REQ: %s\n%!" get; *)
+        let get = sprintf "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n" path host in
+        (* printf "REQ: %s\n%!" get; *)
         let fi, fo =
             Unix.open_connection ~autoclose:false (make_sockaddr host 80) in
-        (* printf p"Connection openned\n%!"; *)
+        (* printf "Connection openned\n%!"; *)
         output_string fo get;
         flush fo;
-        (* printf p"Req sent\n%!"; *)
+        (* printf "Req sent\n%!"; *)
         let r = (IO.read_all fi) in
         close_in fi;
         (* Unix.shutdown_connection fi; *)
@@ -601,10 +601,10 @@ module WebGet = struct
         let pz_host = "www.pubzone.org" in
         let pz_path =
             sprintf 
-                p"/pages/publications/showPublication.do?publicationId=%s" id
+                "/pages/publications/showPublication.do?publicationId=%s" id
         in
         let response = http_get pz_path pz_host in
-        (* printf p"%s\n" response; *)
+        (* printf "%s\n" response; *)
         let rgx_dblp_url =
             Str.regexp
                 "\\(http://dblp.uni-trier.de/\\)db/\
@@ -612,12 +612,12 @@ module WebGet = struct
         let dblp_url =
             try_find rgx_dblp_url response
                 ~err_msg:"ERROR: Didn't find the DBLP URL in response" in
-        (* printf p"MATCH: %s\n" dblp_url; *)
+        (* printf "MATCH: %s\n" dblp_url; *)
         let bibtex_path = 
             Str.global_replace rgx_dblp_url "/rec/bibtex/\\2/\\3" dblp_url in
-        (* printf p"REPLACED: %s\n" bibtex_path; *)
+        (* printf "REPLACED: %s\n" bibtex_path; *)
         let bibtex_page = http_get bibtex_path "dblp.uni-trier.de" in
-        (* printf p"BIBTEX PAGE: %-20s...\n" bibtex_page; *)
+        (* printf "BIBTEX PAGE: %-20s...\n" bibtex_page; *)
         let type_rgx = Str.regexp "<pre>\\(@[a-z]+\\){" in
         let bibtex_type =
             let catched =
@@ -633,7 +633,7 @@ module WebGet = struct
                     ~err_msg:"ERROR: Didn't find the contents of the\
                         BibTeX entry" in
             String.sub catched 0 (String.length catched - 6) in
-        (* printf p"BIBTEX ENTRY: %s\n" bibtex_entry; *)
+        (* printf "BIBTEX ENTRY: %s\n" bibtex_entry; *)
         
         let dblp_xml_path = bibtex_path ^ ".xml" in
         let xml_record =
@@ -642,7 +642,7 @@ module WebGet = struct
             let first = find got "<?xml" in
             sub got first (length got - first)
         in
-        (* printf p"XML: %s\n" xml_record; *)
+        (* printf "XML: %s\n" xml_record; *)
         let (authors, title, year, doi) =
             let clean_pcdata =
                 let entity_rgx = Str.regexp "&#[0-9]+;" in
@@ -664,7 +664,7 @@ module WebGet = struct
             let doi = ref "" in
             open Xml in
             let ixml = parse_string xml_record in
-            (* printf p"TAG: %S\n" (tag ixml); *)
+            (* printf "TAG: %S\n" (tag ixml); *)
             Ls.iter (children (List.hd (children ixml))) ~f:(fun xml ->
                 match tag xml with
                 | "author" ->
@@ -697,15 +697,15 @@ module WebGet = struct
                     | _ -> "") 
                     (get_first lowtitle)
             in
-            sprintf p"%s%d%s" name year t
+            sprintf "%s%d%s" name year t
         in
         [   (`id id);
             (`authors authors);
             (`title title);
             (`year year);
-            (`url (sprintf p"http://%s%s" pz_host pz_path));
+            (`url (sprintf "http://%s%s" pz_host pz_path));
             (`doi doi);
-            (`bibtex (sprintf p"%s%s,\n%s" bibtex_type id bibtex_entry))]
+            (`bibtex (sprintf "%s%s,\n%s" bibtex_type id bibtex_entry))]
     )
 
 end

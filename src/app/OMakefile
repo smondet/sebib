@@ -1,0 +1,5 @@
+
+OCAML_LIBS += ../lib/sebib
+OCAMLINCLUDES += ../lib/
+
+.DEFAULT: $(OCamlProgram sebib, sebib_main)

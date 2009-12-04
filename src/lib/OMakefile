@@ -1,0 +1,7 @@
+LIB_MODULES[] =
+    sebib_std
+    sebib
+
+LIB_NAME = sebib
+
+.DEFAULT: $(OCamlLibrary $(LIB_NAME), $(LIB_MODULES))

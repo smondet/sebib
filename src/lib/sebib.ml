@@ -23,7 +23,7 @@ module AuthorList = struct
         | `comas_and ->
             let lgth = List.length authors in
             String.concat ", "
-                (List.mapi (fun i (first, last) ->
+                (Ls.mapi (fun i (first, last) ->
                     let strand =
                         if i = lgth - 1 && i <> 0 then "and " else "" in
                     sprintf "%s%s %s" strand first last) authors)
@@ -34,7 +34,7 @@ module AuthorList = struct
         | `acm -> 
             let lgth = List.length authors in
             String.concat ", "
-                (List.mapi (fun i (first, last) ->
+                (Ls.mapi (fun i (first, last) ->
                     let strand =
                         if i = lgth - 1 && i <> 0 then "and " else "" in
                     let initial =
@@ -131,15 +131,14 @@ module Biblio = struct
     )
 
     let set_of_string str = 
-        Sexplib.Sexp.of_string ("(" ^ str ^ ")") |> set_of_sexp
+        set_of_sexp (Sexplib.Sexp.of_string ("(" ^ str ^ ")"))
 
     let string_of_set set  =
         let s = sexp_of_set set in 
-        (* Sexplib.Sexp.to_string *)
-        SExpr.to_string_hum ~indent:4 s
+        Sexplib.Sexp.to_string s
 
     let find_field (field:field_name) (entry:entry) = (
-        let f  = List.Exceptionless.find in
+        let f  = Ls.find_opt in
         match field with
         | `id        -> (f (function `id       v -> true | _ -> false) entry)
         | `authors   -> (f (function `authors  v -> true | _ -> false) entry)
@@ -331,20 +330,21 @@ module BibTeX = struct
         | s -> s
 
     let sanitize_latex str = (
-        let rope = Rope.of_string str in
         let ascii_buff = Buffer.create 42 in
-        let u2s u = Rope.to_string (Rope.of_uchar u) in
-
-        Rope.iter (fun u ->
-            Buffer.add_string ascii_buff (latexify (u2s u));
-        ) rope;
+        let uchar_string uc =
+            UTF8.init 1 (fun _ -> uc) in
+        UTF8.iter 
+            (fun unicode_char ->
+                 let ministr = uchar_string unicode_char in
+                 Buffer.add_string ascii_buff (latexify ministr);)
+            ((*UTF8.of_string*) str);
         Buffer.contents ascii_buff
     )
 
     let format_entry entry = (
         let field fi entry = 
-            Biblio.field_or_empty ~authors_style:`bibtex fi entry
-                |> sanitize_latex in
+            sanitize_latex
+                (Biblio.field_or_empty ~authors_style:`bibtex fi entry) in
         let sanitize_title str =
             let rgx = Str.regexp "\\([^\\]\\)\\([A-Z]+\\)" in
             Str.global_replace rgx "\\1{\\2}" str in
@@ -493,9 +493,9 @@ module Format = struct
             | "@{@}" when is_write stack -> "@" 
             | "@{n}" when is_write stack -> "\n" 
             | s when sub_eq s 0 4 "@{if" ->
-                open String in
-                let lgth = length s in
-                let expr = Request.of_string (sub s 4 (lgth - 5)) in
+                (* open String in *)
+                let lgth = String.length s in
+                let expr = Request.of_string (String.sub s 4 (lgth - 5)) in
                 begin match is_write stack, Request.is_ok entry expr with
                 | true, true -> Stack.push `write stack
                 | true, false -> Stack.push `no_write stack
@@ -567,148 +567,6 @@ The format is a string with special patterns:
 end
 
 
-module WebGet = struct
-
-    let make_sockaddr addr port = (
-        let inet_addr = (Unix.gethostbyname addr).Unix.h_addr_list.(0) in
-        Unix.ADDR_INET (inet_addr, port)
-    )
-    let http_get path host = (
-        let get = sprintf "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n" path host in
-        (* printf "REQ: %s\n%!" get; *)
-        let fi, fo =
-            Unix.open_connection ~autoclose:false (make_sockaddr host 80) in
-        (* printf "Connection openned\n%!"; *)
-        output_string fo get;
-        flush fo;
-        (* printf "Req sent\n%!"; *)
-        let r = (IO.read_all fi) in
-        close_in fi;
-        (* Unix.shutdown_connection fi; *)
-        (* close_out fo; -> is the same FD !! *)
-        r
-    )
-
-    let try_find ?err_msg regexp str = (
-        match get (Str.search regexp str) with
-        | None ->
-            failwith (Option.default "`try_find regexp str` failed" err_msg)
-        | Some (_, _, s) ->
-            s
-    )
-
-    let from_PubZone id = (
-        let pz_host = "www.pubzone.org" in
-        let pz_path =
-            sprintf 
-                "/pages/publications/showPublication.do?publicationId=%s" id
-        in
-        let response = http_get pz_path pz_host in
-        (* printf "%s\n" response; *)
-        let rgx_dblp_url =
-            Str.regexp
-                "\\(http://dblp.uni-trier.de/\\)db/\
-                \\([a-zA-Z/0-9]*\\)/[a-zA-Z0-9]+\\.html#\\([a-zA-Z/0-9]*\\)" in
-        let dblp_url =
-            try_find rgx_dblp_url response
-                ~err_msg:"ERROR: Didn't find the DBLP URL in response" in
-        (* printf "MATCH: %s\n" dblp_url; *)
-        let bibtex_path = 
-            Str.global_replace rgx_dblp_url "/rec/bibtex/\\2/\\3" dblp_url in
-        (* printf "REPLACED: %s\n" bibtex_path; *)
-        let bibtex_page = http_get bibtex_path "dblp.uni-trier.de" in
-        (* printf "BIBTEX PAGE: %-20s...\n" bibtex_page; *)
-        let type_rgx = Str.regexp "<pre>\\(@[a-z]+\\){" in
-        let bibtex_type =
-            let catched =
-                try_find type_rgx bibtex_page
-                    ~err_msg:"ERROR: Didn't find BibTeX entry type" in
-            String.sub catched 5 (String.length catched - 5) in
-        (* printf p"BIBTEX TYPE: %s\n" bibtex_type; *)
-        let bibtex_rest_rgx = 
-            Str.regexp "author[ \t]*=[^<]*</pre>" in
-        let bibtex_entry =
-            let catched =
-                try_find bibtex_rest_rgx bibtex_page
-                    ~err_msg:"ERROR: Didn't find the contents of the\
-                        BibTeX entry" in
-            String.sub catched 0 (String.length catched - 6) in
-        (* printf "BIBTEX ENTRY: %s\n" bibtex_entry; *)
-        
-        let dblp_xml_path = bibtex_path ^ ".xml" in
-        let xml_record =
-            open String in
-            let got = http_get dblp_xml_path "dblp.uni-trier.de" in
-            let first = find got "<?xml" in
-            sub got first (length got - first)
-        in
-        (* printf "XML: %s\n" xml_record; *)
-        let (authors, title, year, doi) =
-            let clean_pcdata =
-                let entity_rgx = Str.regexp "&#[0-9]+;" in
-                let replace str =
-                    let code = 
-                        int_of_string
-                            (String.sub str 2 (String.length str - 3)) in
-                        UChar.chr code |> UTF8.of_char |> UTF8.to_string in
-                (fun str ->
-                    String.concat ""
-                        (List.map (function
-                            | Str.Text t -> t
-                            | Str.Delim s -> replace s)
-                            (Str.full_split entity_rgx str)))
-            in
-            let authors = ref [] in
-            let title = ref "" in
-            let year = ref "" in
-            let doi = ref "" in
-            open Xml in
-            let ixml = parse_string xml_record in
-            (* printf "TAG: %S\n" (tag ixml); *)
-            Ls.iter (children (List.hd (children ixml))) ~f:(fun xml ->
-                match tag xml with
-                | "author" ->
-                    let totalname =
-                        pcdata (List.hd (children xml)) |>clean_pcdata in
-                    authors := (String.rsplit totalname " ") :: !authors;
-                | "title" ->
-                    title := pcdata (List.hd (children xml)) |>clean_pcdata
-                | "ee" ->
-                    doi := pcdata (List.hd (children xml)) |>clean_pcdata
-                | "year" ->
-                    year := pcdata (List.hd (children xml)) |>clean_pcdata
-                | _ -> ()
-            );
-            (Ls.rev !authors, !title, int_of_string !year, !doi)
-        in
-        let id = 
-            let name = (String.lowercase (snd (List.hd authors))) in
-            let t =
-                let lowtitle = String.lowercase title in
-                let rec get_first str =
-                    let word, rest = String.split str " " in
-                    match word with
-                    | "the" | "a" | "it" | "is" ->
-                        get_first rest 
-                    | s -> s
-                in
-                String.replace_chars (function
-                    | 'a' .. 'z' as a -> string_of_char a
-                    | _ -> "") 
-                    (get_first lowtitle)
-            in
-            sprintf "%s%d%s" name year t
-        in
-        [   (`id id);
-            (`authors authors);
-            (`title title);
-            (`year year);
-            (`url (sprintf "http://%s%s" pz_host pz_path));
-            (`doi doi);
-            (`bibtex (sprintf "%s%s,\n%s" bibtex_type id bibtex_entry))]
-    )
-
-end
 
 
 

@@ -1,4 +1,6 @@
+
 LIB_MODULES[] =
+    Yaboon_PolyComp
     sebib_std
     sebib
 

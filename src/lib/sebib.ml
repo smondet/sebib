@@ -18,10 +18,10 @@ module AuthorList = struct
         match style with
         | `bibtex ->
             String.concat " and "
-                (List.map (fun (first, last) ->
+                (Ls.map (fun (first, last) ->
                     sprintf "%s, %s" last first) authors)
         | `comas_and ->
-            let lgth = List.length authors in
+            let lgth = Ls.length authors in
             String.concat ", "
                 (Ls.mapi (fun i (first, last) ->
                     let strand =
@@ -29,10 +29,10 @@ module AuthorList = struct
                     sprintf "%s%s %s" strand first last) authors)
         | `comas -> 
             String.concat ", "
-                (List.map (fun (first, last) ->
+                (Ls.map (fun (first, last) ->
                     sprintf "%s %s" first last) authors)
         | `acm -> 
-            let lgth = List.length authors in
+            let lgth = Ls.length authors in
             String.concat ", "
                 (Ls.mapi (fun i (first, last) ->
                     let strand =
@@ -101,9 +101,9 @@ module Biblio = struct
 
     let is_valid set   = (
         let invalids =
-            List.find_all
+            Ls.find_all
                 (fun entry ->
-                    not (List.exists
+                    not (Ls.exists
                         (function `id _ -> true | _ -> false) entry))
                 set in
         match invalids with
@@ -113,16 +113,16 @@ module Biblio = struct
 
     let is_bibtexable set = (
         let has_bibtex =
-            List.exists (function `bibtex _ -> true | _ -> false) in
+            Ls.exists ~f:(function `bibtex _ -> true | _ -> false) in
         let is_miscable e =
-            (List.exists (function `id _ -> true | _ -> false) e) &&
-            (List.exists (function `title _ -> true | _ -> false) e) &&
-            (* (List.exists (function `authors _ -> true | _ -> false) e) && *)
-            (List.exists (function `how _ -> true | _ -> false) e)
-            (* (List.exists (function `year _ -> true | _ -> false) e) *)
+            (Ls.exists (function `id _ -> true | _ -> false) e) &&
+            (Ls.exists (function `title _ -> true | _ -> false) e) &&
+            (* (Ls.exists (function `authors _ -> true | _ -> false) e) && *)
+            (Ls.exists (function `how _ -> true | _ -> false) e)
+            (* (Ls.exists (function `year _ -> true | _ -> false) e) *)
         in
         let invalids =
-            List.find_all
+            Ls.find_all
                 (fun entry -> not ((has_bibtex entry) || (is_miscable entry)))
                 set in
         match invalids with
@@ -390,8 +390,8 @@ module Request = struct
 
     let rec is_ok entry (req:t) = (
         match req with
-        | `list_and l | `la l -> List.for_all (is_ok entry) l
-        | `list_or l | `lo l -> List.exists (is_ok entry) l
+        | `list_and l | `la l -> Ls.for_all (is_ok entry) l
+        | `list_or l | `lo l -> Ls.exists (is_ok entry) l
         | `not t -> not (is_ok entry t)
         | `matches (f,r) -> 
             let str = Biblio.field_or_empty f entry in
@@ -400,12 +400,12 @@ module Request = struct
             (try Str.search_forward rgx str 0 >= 0 with Not_found -> false)
         | `ids l ->
             let idstr = Biblio.field_or_empty `id entry in
-            List.exists ((=$=) idstr) l
+            Ls.exists ((=$=) idstr) l
         | `tags tags_request -> 
             begin match Biblio.find_field `tags entry with
             | Some (`tags tag_list) ->
-                List.for_all
-                    (fun tag -> List.exists ((=$=) tag) tag_list)
+                Ls.for_all
+                    (fun tag -> Ls.exists ((=$=) tag) tag_list)
                     tags_request
             | _ -> false
             end
@@ -418,7 +418,7 @@ module Request = struct
     )
 
     let exec req set = (
-        List.filter (fun e -> is_ok e req) set
+        Ls.filter (fun e -> is_ok e req) set
     )
     let of_string str = (
         t_of_sexp (Sexplib.Sexp.of_string str)
@@ -518,9 +518,9 @@ module Format = struct
             | s -> if is_write stack then s else ""
         in
         String.concat ""
-            (List.concat (List.map (fun entry ->
+            (Ls.concat (Ls.map (fun entry ->
                 let stack = Stack.create () in
-                List.map (function
+                Ls.map (function
                     | Str.Text t -> if is_write stack then t else ""
                     | Str.Delim s -> subs stack entry s)
                     (Str.full_split rgx pattern)) set))

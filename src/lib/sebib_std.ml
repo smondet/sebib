@@ -2,9 +2,6 @@
 include Printf
 include Yaboon_PolyComp.CompAndOveridePoly
 
-let (<@>) x y = compare x y <> 0
-let (<$>) x y = String.compare x y <> 0
-
 
 module Ls = struct
 

@@ -1,0 +1,29 @@
+
+Sebib: S-Expression for BIBliography.
+
+
+Source Tree:
+
+\__ OMakefile                            ->  for omake
+\__ OMakeroot                            ->  (idem)
+\__ src                                  ->
+ |  \__ lib                              ->  Source of the library
+ |   |  \__ OMakefile                    ->
+ |   |  \__ sebib_Yaboon_PolyComp.ml     ->    module imported from Yaboon [1]
+ |   |  \__ sebib.ml                     ->    module containing most of library
+ |   |  \__ sebib_std.ml                 ->    module to 'open'
+ |  \__ app                              ->  Source of the application
+ |   |  \__ OMakefile                    ->
+ |   |  \__ sebib_main.ml                ->    The application code
+\__ test/                                ->
+ |  \__ if_format_test.cat               ->
+ |  \__ invalid_id.sebib                 ->
+ |  \__ invalid_syntax.sebib             ->
+ |  \__ valid.sebib                      ->
+ |  \__ bibtest.tex                      ->
+ |  \__ format_test.cat                  ->
+ |  \__ request_test.sh                  ->
+
+
+
+[1] Yet Another Bunch Of Ocaml Modules: http://code.google.com/p/yaboon/

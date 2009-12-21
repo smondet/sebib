@@ -1,7 +1,7 @@
 
 
 
-.PHONY: clean update_yaboons
+.PHONY: clean update_externals
 
 USE_OCAMLFIND = true
 
@@ -31,8 +31,8 @@ OCAMLFINDFLAGS += -syntax camlp4o
 clean:
     rm -fr _build OMakefile.omc OMakeroot.omc .omakedb .omakedb.lock
 
-update_yaboons: # Go for the last version
-    svn export http\://yaboon.googlecode.com/svn/trunk/PolyComp/PolyComp.ml src/lib/Yaboon_PolyComp.ml
+update_externals: # Go for the last version
+    svn export http\://yaboon.googlecode.com/svn/trunk/PolyComp/PolyComp.ml src/lib/sebib_Yaboon_PolyComp.ml
 
 
 if $(not $(file-exists _build/))

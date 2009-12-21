@@ -6,7 +6,6 @@
 USE_OCAMLFIND = true
 
 OCAMLPACKS[] =
-   xml-light
    extlib
    str
    sexplib.syntax

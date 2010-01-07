@@ -461,7 +461,7 @@ end
 module Format = struct
 
     let str ~pattern set = (
-        let rgx = Str.regexp "@{[^}]+}" in
+        let rex = Pcre.regexp "@\\{[^\\}]+\\}" in
         let strfield = Biblio.field_or_empty in
         let sub_eq s i o m =
             if String.length s < o + i then
@@ -526,9 +526,10 @@ module Format = struct
             (Ls.concat (Ls.map (fun entry ->
                 let stack = Stack.create () in
                 Ls.map (function
-                    | Str.Text t -> if is_write stack then t else ""
-                    | Str.Delim s -> subs stack entry s)
-                    (Str.full_split rgx pattern)) set))
+                    | Pcre.Text t -> if is_write stack then t else ""
+                    | Pcre.Delim s -> subs stack entry s
+                    | _ -> "")
+                    (Pcre.full_split ~rex pattern)) set))
     )
 
     let help = "\

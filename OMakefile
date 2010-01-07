@@ -8,7 +8,6 @@ USE_OCAMLFIND = true
 OCAMLPACKS[] =
    extlib
    pcre
-   str
    sexplib.syntax
 
 

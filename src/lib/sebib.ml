@@ -400,9 +400,8 @@ module Request = struct
         | `not t -> not (is_ok entry t)
         | `matches (f,r) -> 
             let str = Biblio.field_or_empty f entry in
-            let rgx = Str.regexp r in
-            (str <$> "") &&
-            (try Str.search_forward rgx str 0 >= 0 with Not_found -> false)
+            let rex = Pcre.regexp r in
+            (str <$> "") && (Pcre.pmatch ~rex str)
         | `ids l ->
             let idstr = Biblio.field_or_empty `id entry in
             Ls.exists ((=$=) idstr) l
@@ -444,6 +443,7 @@ Syntax of the '-select' expressions (all parentheses are important):
         -> look for the tags (it is an intersection, an \"and\")
     (matches (<field> <regexp>))
         -> look if you find <regexp> in <field>
+        The regexp syntax is Perl-Compatible
     (has <field>)
         -> the field is present
         functionally equivalent to (matches (<field> \"\"))

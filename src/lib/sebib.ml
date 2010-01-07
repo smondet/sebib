@@ -341,17 +341,22 @@ module BibTeX = struct
         Buffer.contents ascii_buff
     )
 
+
     let format_entry entry = (
+        (* The regexps are compiled at each call. TODO: module-local cache ?  *)
+        let capitals_regexp = Pcre.regexp "[A-Z]+" in
+        let leading_whitespace_regexp = 
+            Pcre.regexp ~flags:[ `MULTILINE ] "^[ ]*" in
         let field fi entry = 
             sanitize_latex
                 (Biblio.field_or_empty ~authors_style:`bibtex fi entry) in
         let sanitize_title str =
-            let rgx = Str.regexp "\\([^\\]\\)\\([A-Z]+\\)" in
-            Str.global_replace rgx "\\1{\\2}" str in
+            let subst s = sprintf "{%s}" s in
+            Pcre.substitute ~rex:capitals_regexp ~subst str in
         match Biblio.find_field `bibtex entry with
         | Some (`bibtex b) ->
-            let rgx = Str.regexp "^[ ]*" in
-            Str.global_replace rgx "" b
+              Pcre.substitute ~rex:leading_whitespace_regexp
+                  ~subst:(fun s -> "") b
         | _ ->
             sprintf "@misc{%s,\n\
                 author = {%s},\n\

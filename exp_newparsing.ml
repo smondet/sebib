@@ -192,7 +192,7 @@ let valid4 = "( (id theID) (author \"Aleph One\") )";;
 let invalids = [
   "( (bouh )";
   "( () )  )  fd";
-  (valid3 ^ inval1 ^ valid3);
+  (valid3 ^ ")" ^ valid3);
   " TheAtom ";
   "(TheAtom)";
   "((TheAtom \"))";

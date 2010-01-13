@@ -14,6 +14,8 @@ module Ls = struct
 
 end
 
+module Opt = Option
+
 module Str = struct
   (* This module name voluntarily forbids the Str module of the str
      library *)

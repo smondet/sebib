@@ -20,7 +20,8 @@ module Str = struct
   (* This module name voluntarily forbids the Str module of the str
      library *)
   include ExtString
-  include StringLabels
+  include ExtString.String
+  (* include StringLabels *)
 end
 
 module Ht = struct

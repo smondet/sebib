@@ -243,11 +243,12 @@ let out_str s =
                          | '"' -> "\\\"" | c -> Str.of_char c) in
   if Pcre.pmatch ~rex s then s else sprintf "\"%s\"" (escape s)
 
-let out_field entry field =
+let out_field ?change_name entry field =
   match Biblio.field_or_empty field entry with
   | "" -> ()
   | str ->
-      let str_field = field_name field in
+      let str_field = 
+        Opt.default (field_name field) change_name in
       printf "    (%s %s)\n" str_field (out_str str)
 
 let out_authors entry = 
@@ -258,20 +259,35 @@ let out_authors entry =
       printf "    (authors \n%s)\n" (Str.concat "\n" (Ls.map l ~f))
   | _ -> ()
 
-let out_list entry field =
+let out_list ?add_tag entry field =
   match Biblio.find_field field entry with
   | Some (`tags l) ->
-      printf "    (tags %s)\n" (Str.concat " " (Ls.map l ~f:out_str))
+      let ll =
+        Opt.map_default (fun c -> l @ [c]) l add_tag in
+      printf "    (tags %s)" (Str.concat " " (Ls.map ll ~f:out_str))
   | Some (`keywords l) ->
       printf "    (keywords %s)\n" (Str.concat " " (Ls.map l ~f:out_str))
   | _ -> ()
 
+let find_by_id set id =
+  Ls.find set ~f:(fun e -> id =$= (Biblio.field_or_empty `id e))
+
 let () =
-  eprintf "Old to new Sebib\n";
-  let b = Biblio.set_of_string (IO.read_all (IO.input_channel stdin)) in
+  (* eprintf "Old to new Sebib\n"; *)
+
+  let file_in = Sys.argv.(1) in
+  let file_support = Sys.argv.(2) in
+  (* let file_out = Sys.argv.(3) in *)
+
+  let b =
+    Biblio.set_of_string (Io.read_all (Io.open_in file_in)) in
+  let b_sup = 
+    Biblio.set_of_string (Io.read_all (Io.open_in file_support)) in
+  
   Ls.iter b
     ~f:(fun e ->
-          printf "(   (id %s)\n" (Biblio.field_or_empty `id e)
+          let id = (Biblio.field_or_empty `id e) in
+          printf "(   (id %s)\n" id
           ;out_field e  `title 
           ;out_authors e
           ;out_field e  `how 
@@ -283,10 +299,17 @@ let () =
           ;out_field e  `bibtex 
           ;out_field e  `abstract 
           ;out_field e  `citation 
-          ;out_list e  `tags
           ;out_list e  `keywords
-          ;out_field e  `comments 
+          ;out_field e ~change_name:"comment"  `comments 
           ;          
+          begin try
+            let e_sup = find_by_id b_sup id in
+            out_field ~change_name:"comment short" e_sup `more;
+            out_list e ~add_tag:"difidam" `tags;
+          with Not_found -> 
+            out_list e `tags;
+          end;
           printf ")\n";
        );
   ()
+    

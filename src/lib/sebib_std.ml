@@ -31,3 +31,11 @@ module Ht = struct
   let value_list ht = Ls.of_enum (values ht)
 end
 
+module Io = struct
+    include IO
+    let open_in f =
+        let i = Pervasives.open_in f in
+        IO.input_channel i
+    let open_out f = 
+        IO.output_channel (Pervasives.open_out f)
+end

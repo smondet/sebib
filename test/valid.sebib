@@ -41,7 +41,7 @@
 (
     (id minimal07working)
     (authors (John Normal) (First Family))
-    (title "The not complete example")
+    (title "The not complete example!")
     (how "By the hand of God")
     (year "1902")
 )

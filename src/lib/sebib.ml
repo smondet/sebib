@@ -81,7 +81,7 @@ module Biblio = struct
         | `year 
         | `url 
         | `pdfurl 
-        | `comment
+        | `comment of string
         | `bibtex 
         | `note 
         | `abstract 
@@ -127,66 +127,66 @@ module Biblio = struct
         | l -> `no l
     )
 
-    let find_field (field:field_name) (entry:entry) = (
-        let f  = Ls.find_opt in
-        match field with
-        | `id        -> (f (function `id       v -> true | _ -> false) entry)
-        | `authors   -> (f (function `authors  v -> true | _ -> false) entry)
-        | `title     -> (f (function `title    v -> true | _ -> false) entry)
-        | `how       -> (f (function `how      v -> true | _ -> false) entry)
-        | `date      -> (f (function `date     v -> true | _ -> false) entry)
-        | `year      -> (f (function `year     v -> true | _ -> false) entry)
-        | `url       -> (f (function `url      v -> true | _ -> false) entry)
-        | `pdfurl    -> (f (function `pdfurl   v -> true | _ -> false) entry)
-        | `comment   -> (f (function `comment  v -> true | _ -> false) entry)
-        | `bibtex    -> (f (function `bibtex   v -> true | _ -> false) entry)
-        | `note      -> (f (function `note     v -> true | _ -> false) entry)
-        | `abstract  -> (f (function `abstract v -> true | _ -> false) entry)
-        | `doi       -> (f (function `doi      v -> true | _ -> false) entry)
-        | `citation  -> (f (function `citation v -> true | _ -> false) entry)
-        | `tags      -> (f (function `tags     v -> true | _ -> false) entry)
-        | `keywords  -> (f (function `keywords v -> true | _ -> false) entry)
-    )
-
+    let find_field (field:field_name) (entry:entry) =
+      let f  = Ls.find_opt in
+      match field with
+      | `id        -> (f (function `id       v -> true | _ -> false) entry)
+      | `authors   -> (f (function `authors  v -> true | _ -> false) entry)
+      | `title     -> (f (function `title    v -> true | _ -> false) entry)
+      | `how       -> (f (function `how      v -> true | _ -> false) entry)
+      | `date      -> (f (function `date     v -> true | _ -> false) entry)
+      | `year      -> (f (function `year     v -> true | _ -> false) entry)
+      | `url       -> (f (function `url      v -> true | _ -> false) entry)
+      | `pdfurl    -> (f (function `pdfurl   v -> true | _ -> false) entry)
+      | `bibtex    -> (f (function `bibtex   v -> true | _ -> false) entry)
+      | `note      -> (f (function `note     v -> true | _ -> false) entry)
+      | `abstract  -> (f (function `abstract v -> true | _ -> false) entry)
+      | `doi       -> (f (function `doi      v -> true | _ -> false) entry)
+      | `citation  -> (f (function `citation v -> true | _ -> false) entry)
+      | `tags      -> (f (function `tags     v -> true | _ -> false) entry)
+      | `keywords  -> (f (function `keywords v -> true | _ -> false) entry)
+      | `comment key ->
+          (f (function `comment (s,v) when s =$= key -> true 
+              | _ -> false) entry)
     
     let field_or_empty ?(authors_style=`comas) (fi:field_name) entry = 
-        match find_field fi entry with
-        | Some (`authors al) -> AuthorList.to_string ~style:authors_style al
-        | Some (`title tit) -> tit
-        | Some (`id id) -> id
-        | Some (`how how) -> how
-        | Some (`year y) -> y
-        | Some (`note n) -> n
-        | Some (`date      s) -> s
-        | Some (`url       s) -> s
-        | Some (`pdfurl    s) -> s
-        | Some (`comment ("main", s)) -> s
-        | Some (`bibtex    s) -> s
-        | Some (`abstract  s) -> s
-        | Some (`doi       s) -> s
-        | Some (`citation  s) -> s
-        | Some (`tags      l) -> String.concat ", " l
-        | Some (`keywords  l) -> String.concat ", " l
-        | _ -> ""
+      match find_field fi entry with
+      | Some (`authors al) -> AuthorList.to_string ~style:authors_style al
+      | Some (`title tit) -> tit
+      | Some (`id id) -> id
+      | Some (`how how) -> how
+      | Some (`year y) -> y
+      | Some (`note n) -> n
+      | Some (`date      s) -> s
+      | Some (`url       s) -> s
+      | Some (`pdfurl    s) -> s
+      | Some (`comment (_, s)) -> s
+      | Some (`bibtex    s) -> s
+      | Some (`abstract  s) -> s
+      | Some (`doi       s) -> s
+      | Some (`citation  s) -> s
+      | Some (`tags      l) -> String.concat ", " l
+      | Some (`keywords  l) -> String.concat ", " l
+      | _ -> ""
 
     let field_name_of_string = function
-        | "id" -> `id 
-        | "authors" -> `authors 
-        | "title" -> `title 
-        | "how" -> `how 
-        | "date" -> `date 
-        | "year" -> `year 
-        | "url" -> `url 
-        | "pdfurl" -> `pdfurl 
-        | "comment" -> `comment
-        | "bibtex" -> `bibtex 
-        | "note" -> `note 
-        | "abstract" -> `abstract 
-        | "doi" -> `doi 
-        | "citation" -> `citation 
-        | "tags" -> `tags 
-        | "keywords" -> `keywords 
-        | s -> failwith ("field name unrecognizable: " ^ s)
+      | "id" -> `id 
+      | "authors" -> `authors 
+      | "title" -> `title 
+      | "how" -> `how 
+      | "date" -> `date 
+      | "year" -> `year 
+      | "url" -> `url 
+      | "pdfurl" -> `pdfurl 
+      | "comment" -> `comment "main"
+      | "bibtex" -> `bibtex 
+      | "note" -> `note 
+      | "abstract" -> `abstract 
+      | "doi" -> `doi 
+      | "citation" -> `citation 
+      | "tags" -> `tags 
+      | "keywords" -> `keywords 
+      | s -> failwith ("field name unrecognizable: " ^ s)
 
     let sort ?(by=`id) bibset = 
         let cmp ea eb =
@@ -652,7 +652,12 @@ module Format = struct
             | "@{date}"     when is_write stack -> strfield `date      entry 
             | "@{url}"      when is_write stack -> strfield `url       entry 
             | "@{pdfurl}"   when is_write stack -> strfield `pdfurl    entry 
-            | "@{comment}" when is_write stack -> strfield `comment entry
+            | "@{comment}" when is_write stack ->
+                strfield (`comment "main") entry
+            | s when sub_eq s 0 10 "@{comment-" ->
+                let lgth = Str.length s in
+                let opt = (Str.sub s 10 (lgth - 11)) in
+                strfield (`comment opt) entry
             | "@{bibtex}"   when is_write stack -> BibTeX.format_entry entry 
             | "@{abstract}" when is_write stack -> strfield `abstract  entry 
             | "@{doi}"      when is_write stack -> strfield `doi       entry 
@@ -662,7 +667,6 @@ module Format = struct
             | "@{@}" when is_write stack -> "@" 
             | "@{n}" when is_write stack -> "\n" 
             | s when sub_eq s 0 4 "@{if" ->
-                (* open String in *)
                 let lgth = String.length s in
                 let expr = Request.of_string (String.sub s 4 (lgth - 5)) in
                 begin match is_write stack, Request.is_ok entry expr with

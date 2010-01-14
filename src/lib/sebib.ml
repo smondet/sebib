@@ -59,10 +59,10 @@ module Biblio = struct
         | `title of string
         | `how of string
         | `date of string
-        | `year of int
+        | `year of string
         | `url of string
         | `pdfurl of string
-        | `comments of string
+        | `comment of string * string
         | `bibtex of string
         | `note of string
         | `abstract of string
@@ -70,7 +70,6 @@ module Biblio = struct
         | `citation of string
         | `tags of string list
         | `keywords of string list
-        | `more of string
     ]
     with sexp
 
@@ -83,7 +82,7 @@ module Biblio = struct
         | `year 
         | `url 
         | `pdfurl 
-        | `comments 
+        | `comment
         | `bibtex 
         | `note 
         | `abstract 
@@ -91,7 +90,6 @@ module Biblio = struct
         | `citation 
         | `tags 
         | `keywords 
-        | `more
     ]
     with sexp
     type entry = field list with sexp
@@ -148,7 +146,7 @@ module Biblio = struct
         | `year      -> (f (function `year     v -> true | _ -> false) entry)
         | `url       -> (f (function `url      v -> true | _ -> false) entry)
         | `pdfurl    -> (f (function `pdfurl   v -> true | _ -> false) entry)
-        | `comments  -> (f (function `comments v -> true | _ -> false) entry)
+        | `comment   -> (f (function `comment  v -> true | _ -> false) entry)
         | `bibtex    -> (f (function `bibtex   v -> true | _ -> false) entry)
         | `note      -> (f (function `note     v -> true | _ -> false) entry)
         | `abstract  -> (f (function `abstract v -> true | _ -> false) entry)
@@ -156,7 +154,6 @@ module Biblio = struct
         | `citation  -> (f (function `citation v -> true | _ -> false) entry)
         | `tags      -> (f (function `tags     v -> true | _ -> false) entry)
         | `keywords  -> (f (function `keywords v -> true | _ -> false) entry)
-        | `more      -> (f (function `more     v -> true | _ -> false) entry)
     )
 
     
@@ -166,19 +163,18 @@ module Biblio = struct
         | Some (`title tit) -> tit
         | Some (`id id) -> id
         | Some (`how how) -> how
-        | Some (`year y) -> string_of_int y
+        | Some (`year y) -> y
         | Some (`note n) -> n
         | Some (`date      s) -> s
         | Some (`url       s) -> s
         | Some (`pdfurl    s) -> s
-        | Some (`comments  s) -> s
+        | Some (`comment ("main", s)) -> s
         | Some (`bibtex    s) -> s
         | Some (`abstract  s) -> s
         | Some (`doi       s) -> s
         | Some (`citation  s) -> s
         | Some (`tags      l) -> String.concat ", " l
         | Some (`keywords  l) -> String.concat ", " l
-        | Some (`more      s) -> s
         | _ -> ""
 
     let field_name_of_string = function
@@ -190,7 +186,7 @@ module Biblio = struct
         | "year" -> `year 
         | "url" -> `url 
         | "pdfurl" -> `pdfurl 
-        | "comments" -> `comments 
+        | "comment" -> `comment
         | "bibtex" -> `bibtex 
         | "note" -> `note 
         | "abstract" -> `abstract 
@@ -198,7 +194,6 @@ module Biblio = struct
         | "citation" -> `citation 
         | "tags" -> `tags 
         | "keywords" -> `keywords 
-        | "more" -> `more
         | s -> failwith ("field name unrecognizable: " ^ s)
 
     let sort ?(by=`id) bibset = 
@@ -210,6 +205,184 @@ module Biblio = struct
         Ls.sort ~cmp bibset
 
 end
+
+module Parsing = struct
+  module Sx = Sexplib.Sexp
+    
+  exception Parse_error of string
+
+  (* Error when an Atom is found instead of a list. *)
+  let fail_atom s =
+    let msg =
+      sprintf "Parsing Error unxepected atom \"%s\" there should be a list\n" s in
+    raise (Parse_error msg)    
+
+  let fail_empty s_opt =
+    let msg =
+      sprintf "Parsing Error: empty field %s" 
+        (Opt.map_default (fun s ->
+                            sprintf "\"%s\"" (Sx.to_string_hum s))
+           "()" s_opt)
+    in
+    raise (Parse_error msg)    
+
+  let fail_bad_field field = 
+    let msg =
+      sprintf "Parsing Error ununderstandable data for field: \"%s\""
+        (Str.concat " " (Ls.map (fun s -> Sx.to_string_hum s) field)) in
+    raise (Parse_error msg)
+
+  let fail_bad_author sexp =
+    let msg =
+      sprintf "Parsing Error ununderstandable author: \"%s\""
+        (Sx.to_string_hum sexp) in
+    raise (Parse_error msg)
+
+  let fail_bad_atom_list kind sexp =
+    let msg =
+      sprintf "Parsing Error ununderstandable %s: \"%s\""
+        kind (Sx.to_string_hum sexp) in
+    raise (Parse_error msg)
+
+  let fail_no_id fields = 
+    let msg =
+      sprintf "Parsing Error entry has no ID: \"(%s)\""
+        (Str.concat " " (Ls.map (fun s -> Sx.to_string_hum (Sx.List s)) fields))
+    in
+    raise (Parse_error msg)
+
+  let parse_authors sexp_list : AuthorList.t =
+    Ls.map sexp_list 
+      ~f:(function
+            | Sx.List ((Sx.Atom first) :: (Sx.Atom last) :: []) -> (first, last)
+            | Sx.Atom one_name -> ("", one_name)
+            | sexp -> fail_bad_author sexp)
+
+  let parse_atom_list kind sexp_list =
+    Ls.map sexp_list 
+      ~f:(function
+            | Sx.Atom name -> name
+            | sexp -> fail_bad_atom_list kind sexp)
+
+  let parse_entry field_sexp_list =
+    let its_id = ref None in
+    let its_fields =
+      Ls.map field_sexp_list
+        ~f:(function
+              | [] -> fail_empty None
+              | one :: [] -> fail_empty (Some one)
+              | (Sx.Atom h1) :: (Sx.Atom h2) :: [] as l ->
+                  begin match h1 with
+                  | "id" -> its_id := Some h2 ; (`id h2)
+                  | "title" -> (`title h2)
+                  | "how" -> (`how h2)
+                  | "year" -> (`year h2)
+                  | "url" -> (`url h2)
+                  | "pdfurl" -> (`pdfurl h2)
+                  | "bibtex" -> (`bibtex h2)
+                  | "note" -> (`note h2)
+                  | "abstract" -> (`abstract h2)
+                  | "doi" -> (`doi h2)
+                  | "citation" -> (`citation h2)
+                  | "comment" -> (`comment ("main", h2))
+                  | "authors" | "author"  -> (`authors [ ("", h2) ])
+                      (* one single-named author *)
+                  | s -> fail_bad_field l
+                  end
+              | (Sx.Atom "comment") :: (Sx.Atom h2) :: (Sx.Atom h3) :: [] ->
+                  (`comment (h2, h3))
+              | (Sx.Atom h) :: t as l ->
+                  begin match h with
+                  | "authors" | "author" -> (`authors (parse_authors t))
+                  | "tags" -> (`tags (parse_atom_list "tag" t))
+                  | "keywords" -> (`keywords (parse_atom_list "keyword" t))
+                  | s -> fail_bad_field l
+                  end
+              | l -> fail_bad_field l)
+    in
+    match !its_id with
+    | None -> fail_no_id field_sexp_list
+    | Some id -> (id, (its_fields : Biblio.entry))
+
+  let rec parse str =
+    (* let sexps = Sx.load_sexps str in ---> only for file names *)
+    let valid_and_parse_entry sexp =
+      match sexp with
+      | Sx.Atom s -> fail_atom s
+      | Sx.List l ->
+          let field_sexp_list =
+            Ls.map l
+              ~f:(function
+                    | Sx.Atom s -> fail_atom s
+                    | Sx.List l ->  l) in
+          parse_entry field_sexp_list
+
+    in
+
+    let whitespace_regexp = 
+      Pcre.regexp ~flags:[ `MULTILINE ] "[ \t\n\r]*" in
+    let is_white s = Pcre.pmatch ~rex:whitespace_regexp s in
+
+    let string_abstract pos max_len s =
+      if lei max_len ((Str.length s) - pos) then
+        (Str.sub s pos max_len) ^ "    [...]"
+      else 
+        (Str.sub s pos ((Str.length s) - pos))
+    in
+
+    let pos = ref 0 in
+    let res = Ht.create 42 in
+    let the_end = Str.length str  in
+    while !pos < the_end do
+      (* printf "pos: %d, the_end: %d\n" !pos the_end; *)
+      try 
+        match Sx.parse ~pos:!pos str with
+        | Sx.Cont (state, _) ->
+            if is_white (Str.sub str !pos (the_end - !pos)) && state then
+              pos := the_end
+            else 
+              let msg =
+                sprintf "Parsing Error (sexplib, unfinished s-expression?) \
+                         for string: \"%s\""
+                  (string_abstract !pos 80 str) in
+              raise (Parse_error msg)
+        | Sx.Done (sx, parse_pos) ->
+            pos := parse_pos.Sx.buf_pos;
+            let id, entry = valid_and_parse_entry sx in
+            Ht.add res id entry;
+      with
+        Sx.Parse_error pe ->
+          let msg =
+            sprintf "Parsing Error (sexplib): %s,  at \
+                 character %d, i.e., %d-th of string: \"%s\""
+              pe.Sx.err_msg pe.Sx.parse_state.Sx.parse_pos.Sx.buf_pos
+              (pe.Sx.parse_state.Sx.parse_pos.Sx.text_char - 1)
+              (string_abstract !pos 80 str)
+          in
+          raise (Parse_error msg)
+    done;
+    Ls.rev (Ht.value_list res)
+
+(*
+  (* This also works but, error messages are far from perfect: *)
+  let sexp = 
+    try Sx.of_string (sprintf "(%s)" str) 
+    with Failure msg ->
+      raise (ParseError (sprintf "Syntax Error (sexplib): %s" msg))
+  in
+  match sexp with
+  | Sx.Atom s -> fail_atom s
+  | Sx.List l ->
+      Ls.map l
+        ~f:(function
+            | Sx.Atom s -> fail_atom s
+            | Sx.List l -> parse_entry l)
+*)
+end
+
+
+
+
 
 module BibTeX = struct
 
@@ -487,14 +660,13 @@ module Format = struct
             | "@{date}"     when is_write stack -> strfield `date      entry 
             | "@{url}"      when is_write stack -> strfield `url       entry 
             | "@{pdfurl}"   when is_write stack -> strfield `pdfurl    entry 
-            | "@{comments}" when is_write stack -> strfield `comments  entry 
+            | "@{comment}" when is_write stack -> strfield `comment  entry 
             | "@{bibtex}"   when is_write stack -> BibTeX.format_entry entry 
             | "@{abstract}" when is_write stack -> strfield `abstract  entry 
             | "@{doi}"      when is_write stack -> strfield `doi       entry 
             | "@{citation}" when is_write stack -> strfield `citation  entry 
             | "@{tags}"     when is_write stack -> strfield `tags      entry 
             | "@{keywords}" when is_write stack -> strfield `keywords  entry 
-            | "@{more}"     when is_write stack -> strfield `more      entry 
             | "@{@}" when is_write stack -> "@" 
             | "@{n}" when is_write stack -> "\n" 
             | s when sub_eq s 0 4 "@{if" ->
@@ -551,7 +723,7 @@ The format is a string with special patterns:
     @{date}           : date
     @{url}            : url
     @{pdfurl}         : pdfurl
-    @{comments}       : comments
+    @{comment}        : \"main\" comment
     @{bibtex}         : The (maybe generated) BibTeX entry
                         (if there's no `bibtex' field, the entry is generated,
                         like for the '-bibtex' option)
@@ -560,7 +732,6 @@ The format is a string with special patterns:
     @{citation}       : citation
     @{tags}           : tags (coma separated list)
     @{keywords}       : keywords (coma separated list)
-    @{more}           : more
     @{@}              : the '@' character
     @{n}              : the new-line character
     @{if <expr>} AAA @{else} BBB @{endif} :

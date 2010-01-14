@@ -323,7 +323,7 @@ module Parsing = struct
     in
 
     let pos = ref 0 in
-    let res = Ht.create 42 in
+    let res = ref [] in
     let the_end = Str.length str  in
     while !pos < the_end do
       (* printf "pos: %d, the_end: %d\n" !pos the_end; *)
@@ -341,7 +341,7 @@ module Parsing = struct
         | Sx.Done (sx, parse_pos) ->
             pos := parse_pos.Sx.buf_pos;
             let id, entry = valid_and_parse_entry sx in
-            Ht.add res id entry;
+            res := entry :: !res;
       with
         Sx.Parse_error pe ->
           let msg =
@@ -353,7 +353,7 @@ module Parsing = struct
           in
           raise (Parse_error msg)
     done;
-    Ls.rev (Ht.value_list res)
+    Ls.rev !res
 
 (*
   (* This also works but, error messages are far from perfect: *)

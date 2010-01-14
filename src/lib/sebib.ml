@@ -9,10 +9,10 @@ module Info = struct
 end
 
 module AuthorList = struct
-    type author = string * string with sexp
-    type t = author list with sexp
+    type author = string * string
+    type t = author list
 
-    type style = [ `comas_and | `acm | `bibtex | `comas | `et_al ] with sexp
+    type style = [ `comas_and | `acm | `bibtex | `comas | `et_al ]
 
     let to_string ?(style:style=`comas) authors = (
         match style with
@@ -71,7 +71,6 @@ module Biblio = struct
         | `tags of string list
         | `keywords of string list
     ]
-    with sexp
 
     type field_name = [
         | `id 
@@ -90,23 +89,23 @@ module Biblio = struct
         | `citation 
         | `tags 
         | `keywords 
-    ]
-    with sexp
-    type entry = field list with sexp
+    ] with sexp
 
-    type set = entry list with sexp
+    type entry = field list
+
+    type set = entry list
 
 
     let is_valid set   = (
-        let invalids =
-            Ls.find_all
-                (fun entry ->
-                    not (Ls.exists
-                        (function `id _ -> true | _ -> false) entry))
-                set in
-        match invalids with
-        | [] -> `yes
-        | l -> `no l
+      let invalids =
+        Ls.find_all
+          (fun entry ->
+             not (Ls.exists
+                    (function `id _ -> true | _ -> false) entry))
+          set in
+      match invalids with
+      | [] -> `yes
+      | l -> `no l
     )
 
     let is_bibtexable set = (
@@ -127,13 +126,6 @@ module Biblio = struct
         | [] -> `yes
         | l -> `no l
     )
-
-    let set_of_string str = 
-        set_of_sexp (Sexplib.Sexp.of_string ("(" ^ str ^ ")"))
-
-    let string_of_set set  =
-        let s = sexp_of_set set in 
-        Sexplib.Sexp.to_string s
 
     let find_field (field:field_name) (entry:entry) = (
         let f  = Ls.find_opt in
@@ -660,7 +652,7 @@ module Format = struct
             | "@{date}"     when is_write stack -> strfield `date      entry 
             | "@{url}"      when is_write stack -> strfield `url       entry 
             | "@{pdfurl}"   when is_write stack -> strfield `pdfurl    entry 
-            | "@{comment}" when is_write stack -> strfield `comment  entry 
+            | "@{comment}" when is_write stack -> strfield `comment entry
             | "@{bibtex}"   when is_write stack -> BibTeX.format_entry entry 
             | "@{abstract}" when is_write stack -> strfield `abstract  entry 
             | "@{doi}"      when is_write stack -> strfield `doi       entry 

@@ -1,16 +1,15 @@
 
 (
     (id most09complete)
-    (authors ((John Most) (First Family)))
+    (authors (John Most) (First Family))
     (title "The most complete example")
     (how "By the hand of God")
-    (date "Wed Sep  9 11:39:58 CEST 2009")
     (year "1901")
-    (keywords ("Personal Data Management" "Forty-two"))
+    (keywords "Personal Data Management" "Forty-two")
     (url http://url.to.the/page?of&the&paper)
     (pdfurl http://link.t.o/the?pdf)
-    (tags (onetag onemoretag))
-    (comments "
+    (tags onetag onemoretag)
+    (comment "
         {i|Some comments}, using {t|bracetax}
         we can enter double quotes: \"
         ")
@@ -33,8 +32,7 @@
     (doi http://dx.doi.org/10.1007/978-3-540-87355-6_1) 
     (citation " Skevik, K., Siekkinen, M., Goebel, V., and Plagemann, T. 2008. Experiences with Application Development for Autonomic Networks. In Proceedings of the 3rd IEEE international Workshop on Modelling Autonomic Communications Environments (Samos Island, Greece, September 22 - 26, 2008). S. Meer, M. Burgess, and S. Denazis, Eds. Lecture Notes In Computer Science, vol. 5276. Springer-Verlag, Berlin, Heidelberg, 1-13. DOI= http://dx.doi.org/10.1007/978-3-540-87355-6_1 ")
 
-    ; more is user-defined, can be any string...
-    (more "(another (s- (expr or) (maybe <XML/>) (or whatever)))")
+    (comment more "(another (s- (expr or) (maybe <XML/>) (or whatever)))")
 )
 
 ; some comment...
@@ -42,34 +40,33 @@
 
 (
     (id minimal07working)
-    (date "Wed Sep  9 11:39:58 CEST 2009")
-    (authors ((John Normal) (First Family)))
+    (authors (John Normal) (First Family))
     (title "The not complete example")
     (how "By the hand of God")
     (year "1902")
 )
 
 ((id one07author)
-    (authors ((Author One)))
-    (tags (tag7 tag8 onemoretag))
+    (author (Author One))
+    (tags tag7 tag8 onemoretag)
 )
 
 ((id many07authors)
-    (authors (
-        (First Family1)
-        (First Family2)
-        (First Family3)
-        (First Family4)
-        (First Family5)
-        (First Family6)
-    )))
+    (authors
+     (First Family1)
+     (First Family2)
+     (First Family3)
+     (First Family4)
+     (First Family5)
+     (First Family6)
+     ))
 
 (
     (id utf8test)
-    (authors (
+    (authors 
         (Jéţø Möûdæ)
         (Éşçölœ Ñéèßïù)
-    ))
+    )
     (title "A Title with ACRONYM, And uppercase Ütf8, also Löwercæsê")
     (how "It is F$#@^!|£%king \£aT€X (©), which will nœvør bî üţf8 compliant")
 )
@@ -77,9 +74,9 @@
 
 ((id mondet2008streaming)
      (authors
-         ((Sebastien Mondet) (Wei Cheng) ("G&#233;raldine" Morin)
+         (Sebastien Mondet) (Wei Cheng) ("G&#233;raldine" Morin)
              (Romulus Grigoras) ("Fr&#233;d&#233;ric" Boudon)
-             ("Wei Tsang" Ooi)))
+             ("Wei Tsang" Ooi))
      (title "Streaming of plants in distributed virtual environments.")
      (year 2008) (doi http://doi.acm.org/10.1145/1459359.1459361)
      (bibtex

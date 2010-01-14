@@ -11,18 +11,17 @@ let with_file_out file func =
     func o
 
 let perform_validation name condition validation biblio errcode = (
-    if condition then (
-        match validation biblio with
-        | `yes ->
-            (* printf p"Validation: OK\n"; *)
-            ()
-        | `no l ->
-            printf "%s validation; the following items are wrong:\n%s\n" 
-                name
-                (Biblio.string_of_set l);
-            exit errcode;
-    );
+  if condition then (
+    match validation biblio with
+    | `yes ->
+        (* printf p"Validation: OK\n"; *)
+        ()
+    | `no l ->
+        printf "%s validation: KO" name;
+        exit errcode;
+  );
 )
+
 let () = (
     let do_validate = ref false in
     let do_bibtexable = ref false in
@@ -113,7 +112,7 @@ let () = (
             else strs_from_files) in
 
     let biblio = 
-        let b = Biblio.set_of_string bibliography_str in
+        let b = Parsing.parse bibliography_str in
         let filtered =
             if !request =$= "" then b 
             else Request.exec (Request.of_string !request) b in
@@ -137,13 +136,15 @@ let () = (
     begin match !output_sebib with
     | "" -> ();
     | "-" ->
-        let sexpr = (Biblio.string_of_set biblio) in
-        print_string (String.sub sexpr 1 (String.length sexpr - 2))
+        (* let sexpr = (Biblio.string_of_set biblio) in *)
+        (* print_string (String.sub sexpr 1 (String.length sexpr - 2)) *)
+        failwith "Output Sebib Not Implemented Yet"
     | f -> 
-        with_file_out f
-            (fun o ->
-                 let sexpr = (Biblio.string_of_set biblio) in
-                 fprintf o "%s" (String.sub sexpr 1 (String.length sexpr - 2)); );
+        failwith "Output Sebib Not Implemented Yet"
+        (*with_file_out f
+          (fun o ->
+             let sexpr = (Biblio.string_of_set biblio) in
+          fprintf o "%s" (String.sub sexpr 1 (String.length sexpr - 2)); ); *)
     end;
 
 

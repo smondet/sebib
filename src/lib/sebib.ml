@@ -148,7 +148,7 @@ module Biblio = struct
       | `comment key ->
           (f (function `comment (s,v) when s =$= key -> true 
               | _ -> false) entry)
-    
+            
     let field_or_empty
         ?(title_style : [`none | `punct ] = `none)
         ?(authors_style=`comas)
@@ -190,6 +190,10 @@ module Biblio = struct
       | "url" -> `url 
       | "pdfurl" -> `pdfurl 
       | "comment" -> `comment "main"
+      | s when (Str.length s >= 8) && (Str.sub s 0 8 =$= "comment-") ->
+          let lgth = Str.length s in
+          let opt = (Str.sub s 8 (lgth - 8)) in
+          (`comment opt)
       | "bibtex" -> `bibtex 
       | "note" -> `note 
       | "abstract" -> `abstract 
@@ -234,7 +238,7 @@ module Parsing = struct
       sprintf "Parsing Error ununderstandable data for field: \"%s\""
         (Str.concat " " (Ls.map (fun s -> Sx.to_string_hum s) field)) in
     raise (Parse_error msg)
-
+      
   let fail_bad_author sexp =
     let msg =
       sprintf "Parsing Error ununderstandable author: \"%s\""
@@ -556,18 +560,64 @@ end
 
 (** The "-select" domain specific language *)
 module Request = struct
+  
+  type t = [
+  | `list_and of t list
+  | `la of t list
+  | `list_or of t list
+  | `lo of t list
+  | `not of t
+  | `matches of Biblio.field_name * string
+  | `ids of string list
+  | `tags of string list
+  | `has of Biblio.field_name
+  ]
+  
+  module Sx = Sexplib.Sexp
+    
+  exception Parse_error of string
 
-    type t = [
-        | `list_and of t list
-        | `la of t list
-        | `list_or of t list
-        | `lo of t list
-        | `not of t
-        | `matches of Biblio.field_name * string
-        | `ids of string list
-        | `tags of string list
-        | `has of Biblio.field_name
-    ] with sexp
+  let of_string str =
+    let fail msg =
+      raise (Parse_error (sprintf "Request Syntax Error: %s" msg)) in
+    let atom_list l =
+      Ls.map l ~f:(function Sx.Atom s -> s
+                   | _ -> fail "Expecting list of atoms") in
+    let rec parse_expr =
+      function
+      | Sx.Atom s -> fail (sprintf "Unexpected atom: %s" s)
+      | Sx.List ((Sx.Atom "and") :: args) ->
+          if args =@= [] then
+            fail "'and' expects arguments"
+          else
+            (`list_and (Ls.map parse_expr args))
+      | Sx.List ((Sx.Atom "or") :: args) ->
+          if args =@= [] then
+            fail "'or' expects arguments"
+          else
+            (`list_or (Ls.map parse_expr args))
+      | Sx.List ((Sx.Atom "not") :: args) ->
+          (`not (parse_expr (Sx.List args)))
+      | Sx.List [(Sx.Atom "matches"); (Sx.Atom field); (Sx.Atom rex)] ->
+          (`matches ((Biblio.field_name_of_string field), rex))
+      | Sx.List ((Sx.Atom "ids") :: args) ->
+          (`ids (atom_list args))
+      | Sx.List ((Sx.Atom "tags") :: args) ->
+          (`tags (atom_list args))
+      | Sx.List [(Sx.Atom "has"); (Sx.Atom field)] ->
+          (`has (Biblio.field_name_of_string field))
+      | Sx.List ((Sx.List l) :: []) ->
+          (parse_expr (Sx.List l))
+      | s -> fail (sprintf 
+                     "Can't parse expression %s" 
+                     (Sx.to_string s))
+    in
+    let sexp = 
+      try Sx.of_string (sprintf "(%s)" str) 
+      with Failure msg ->
+        raise (Parse_error (sprintf "Request Syntax Error (sexplib): %s" msg))
+    in
+    (parse_expr sexp)
 
     let rec is_ok entry (req:t) = (
         match req with
@@ -600,34 +650,29 @@ module Request = struct
     let exec req set = (
         Ls.filter (fun e -> is_ok e req) set
     )
-    let of_string str = (
-        t_of_sexp (Sexplib.Sexp.of_string str)
-    )
     let help = "\
 Syntax of the '-select' expressions (all parentheses are important):
-    (ids (<id1> <id2> <id3> ...))
+    (ids <id1> <id2> <id3> ...)
         -> the items whose ids are <id1>, <id2>, ...
-    (list_and (<expr1> <expr2> ...))
+    (and <expr1> <expr2> ...)
         -> logical \"and\" between expressions
-        (la ...) is a shortcut to (list_and ...)
-    (list_or (<expr1> <expr2> ...))
+    (or <expr1> <expr2> ...)
         -> logical \"or\" between expressions
-        (lo ...) is a shortcut to (list_or ...)
     (not <expr>)
         -> logical negation of an expression
-    (tags (<tag1> <tag2> <tag3>))
-        -> look for the tags (it is an intersection, an \"and\")
-    (matches (<field> <regexp>))
+    (tags <tag1> <tag2> <tag3>)
+        -> look for the tags (it is an intersection, i.e. an \"and\")
+    (matches <field> <regexp>)
         -> look if you find <regexp> in <field>
         The regexp syntax is Perl-Compatible
     (has <field>)
         -> the field is present
         functionally equivalent to (matches (<field> \"\"))
 Examples:
-    (lo ((has bibtex) (la ((has id) (has authors) (has title) (has how)))))
+    (or (has bibtex) (and (has id) (has authors) (has title) (has how)))
         -> selects entries which have a bibtex field, or at least, enough
         information to generate a @misc BibTeX entry.
-    (matches (title comp[a-z]+))
+    (matches title comp[a-z]+)
         -> selects entries whose title field exists and matches the regexp
         (e.g. \"The completion\" matches but \"The comp.\" does not).
 "

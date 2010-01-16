@@ -8,27 +8,27 @@ do_test() {
     sebib -format "@{id}: @{title}@{n}" -select "$1" $SOURCES
 }
 
-do_test "(ids (most09complete one07author))"
-do_test "(ids (minimal07working))"
+do_test "(ids most09complete one07author)"
+do_test "(ids minimal07working)"
 
-do_test "(list_and ((ids (most09complete one07author)) (has more)))"
-do_test "(list_or ((ids (most09complete one07author)) (ids (minimal07working))))"
+do_test "and (ids most09complete one07author) (has comment-short)"
+do_test "(or ((ids most09complete one07author)) (ids minimal07working))"
 
-do_test "(la ((ids (most09complete one07author)) (has more)))"
-do_test "(lo ((ids (most09complete one07author)) (ids (minimal07working))))"
-
-
-do_test "(tags (onetag))"
-do_test "(tags (onemoretag))"
-do_test "(list_and ((tags (onemoretag)) (not (tags (tag7)))))"
-
-do_test "(matches (authors Joh))"
-
-do_test "(matches (title \"comple.*\"))"
-do_test "(not (matches (title comple.*)))"
-
-do_test "(matches (more \"\"))"
+do_test "(and (ids most09complete one07author) (has tags))"
+do_test "or (ids most09complete one07author) (ids minimal07working)"
 
 
-do_test "(has more)"
+do_test "(tags onetag)"
+do_test "tags onemoretag"
+do_test "(and (tags onemoretag) (not (tags tag7)))"
+
+do_test "matches authors Joh"
+
+do_test "(matches title \"comple.*\")"
+do_test "(not (matches title comple.*))"
+
+do_test "((matches authors \"\"))"
+
+
+do_test "(has how)"
 do_test "(not (has how))"

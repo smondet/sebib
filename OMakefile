@@ -8,7 +8,7 @@ USE_OCAMLFIND = true
 OCAMLPACKS[] =
    extlib
    pcre
-   sexplib.syntax
+   sexplib.core
 
 
 if $(not $(OCAMLFIND_EXISTS))
@@ -25,7 +25,7 @@ OCAMLOPTFLAGS +=
 OCAML_LINK_FLAGS +=
 OCAML_BYTE_LINK_FLAGS +=
 OCAML_NATIVE_LINK_FLAGS +=
-OCAMLFINDFLAGS += -syntax camlp4o
+OCAMLFINDFLAGS +=
 
 
 clean:

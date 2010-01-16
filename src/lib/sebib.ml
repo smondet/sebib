@@ -1,4 +1,3 @@
-TYPE_CONV_PATH "Sebib"
 
 open Sebib_std
 
@@ -89,7 +88,7 @@ module Biblio = struct
         | `citation 
         | `tags 
         | `keywords 
-    ] with sexp
+    ]
 
     type entry = field list
 

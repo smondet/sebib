@@ -364,21 +364,6 @@ module Parsing = struct
     done;
     Ls.rev !res
 
-(*
-  (* This also works but, error messages are far from perfect: *)
-  let sexp = 
-    try Sx.of_string (sprintf "(%s)" str) 
-    with Failure msg ->
-      raise (ParseError (sprintf "Syntax Error (sexplib): %s" msg))
-  in
-  match sexp with
-  | Sx.Atom s -> fail_atom s
-  | Sx.List l ->
-      Ls.map l
-        ~f:(function
-            | Sx.Atom s -> fail_atom s
-            | Sx.List l -> parse_entry l)
-*)
 end
 
 module Printing = struct
@@ -425,7 +410,7 @@ module Printing = struct
     let out_list chan entry field =
       match Biblio.find_field field entry with
       | Some (`tags l) ->
-          fprintf chan "    (tags %s)" (Str.concat " " (Ls.map l ~f:out_str))
+          fprintf chan "    (tags %s)\n" (Str.concat " " (Ls.map l ~f:out_str))
       | Some (`keywords l) ->
           fprintf chan "    (keywords %s)\n"
             (Str.concat " " (Ls.map l ~f:out_str))
@@ -451,9 +436,8 @@ module Printing = struct
             Ls.iter e
               ~f:(function
                   | `comment (k,v) ->
-                      fprintf chan "    (comment %s %s)" (out_str k) (out_str v)
+                      fprintf chan "    (comment %s %s)\n" (out_str k) (out_str v)
                   | _ -> ());
-            (* out_field e  `comments;  *)
             fprintf chan  ")\n";
          );
     ()

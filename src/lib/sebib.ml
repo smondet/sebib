@@ -381,6 +381,86 @@ module Parsing = struct
 *)
 end
 
+module Printing = struct
+
+  let field_name : Biblio.field_name -> string = function
+    | `id ->         "id"
+    | `authors ->    "authors"
+    | `title ->      "title"
+    | `how ->        "how" 
+    | `year ->       "year"
+    | `url ->        "url" 
+    | `pdfurl ->     "pdfurl"
+    | `comment s -> (sprintf "comments %s" s) 
+    | `bibtex ->     "bibtex" 
+    | `note ->       "note" 
+    | `abstract ->   "abstract"
+    | `doi ->        "doi" 
+    | `citation ->   "citation"
+    | `tags ->       "tags" 
+    | `keywords ->   "keywords"
+
+  let print chan bib_set =
+    let rex = Pcre.regexp "^[A-Za-z0-9\\?\\!\\-\\:\\/\\.\\,\\~]+$" in
+    let out_str s =
+      let escape = 
+        Str.replace_chars (function '\\' -> "\\\\" 
+                           | '"' -> "\\\"" | c -> Str.of_char c) in
+      if Pcre.pmatch ~rex s then s else sprintf "\"%s\"" (escape s) in
+    let out_field chan entry field =
+      match Biblio.field_or_empty field entry with
+      | "" -> ()
+      | str ->
+          let str_field = (field_name field) in
+          fprintf chan "    (%s %s)\n" str_field (out_str str) in
+    
+    let out_authors chan entry = 
+      match Biblio.find_field `authors entry with
+      | Some (`authors l) ->
+          let f (first, last) =
+            sprintf "        (%s %s)" (out_str first) (out_str last) in
+          fprintf chan "    (authors \n%s)\n" (Str.concat "\n" (Ls.map l ~f))
+      | _ -> () in
+
+    let out_list chan entry field =
+      match Biblio.find_field field entry with
+      | Some (`tags l) ->
+          fprintf chan "    (tags %s)" (Str.concat " " (Ls.map l ~f:out_str))
+      | Some (`keywords l) ->
+          fprintf chan "    (keywords %s)\n"
+            (Str.concat " " (Ls.map l ~f:out_str))
+      | _ -> () in
+
+    Ls.iter bib_set
+      ~f:(fun e ->
+            let id = (Biblio.field_or_empty `id e) in
+            fprintf chan "(   (id %s)\n" id;
+            out_field chan e  `title;
+            out_authors chan e;
+            out_field chan e  `how;
+            out_field chan e  `year;
+            out_field chan e  `note;
+            out_field chan e  `url;
+            out_field chan e  `doi;
+            out_field chan e  `pdfurl;
+            out_field chan e  `bibtex;
+            out_field chan e  `abstract;
+            out_field chan e  `citation;
+            out_list  chan e  `keywords;
+            out_list  chan e  `tags;
+            Ls.iter e
+              ~f:(function
+                  | `comment (k,v) ->
+                      fprintf chan "    (comment %s %s)" (out_str k) (out_str v)
+                  | _ -> ());
+            (* out_field e  `comments;  *)
+            fprintf chan  ")\n";
+         );
+    ()
+
+end
+
+
 
 
 module BibTeX = struct

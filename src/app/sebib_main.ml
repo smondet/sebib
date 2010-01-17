@@ -136,17 +136,11 @@ let () = (
     begin match !output_sebib with
     | "" -> ();
     | "-" ->
-        (* let sexpr = (Biblio.string_of_set biblio) in *)
-        (* print_string (String.sub sexpr 1 (String.length sexpr - 2)) *)
-        failwith "Output Sebib Not Implemented Yet"
+        Sebib.Printing.print stdout biblio;
     | f -> 
-        failwith "Output Sebib Not Implemented Yet"
-        (*with_file_out f
-          (fun o ->
-             let sexpr = (Biblio.string_of_set biblio) in
-          fprintf o "%s" (String.sub sexpr 1 (String.length sexpr - 2)); ); *)
+        with_file_out f (fun o -> Sebib.Printing.print o biblio; );
     end;
-
+    
 
     if !out_format <$> "" then (
         printf "%s" (Format.str ~pattern:!out_format biblio);

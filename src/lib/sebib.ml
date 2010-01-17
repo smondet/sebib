@@ -57,7 +57,6 @@ module Biblio = struct
         | `authors of AuthorList.t
         | `title of string
         | `how of string
-        | `date of string
         | `year of string
         | `url of string
         | `pdfurl of string
@@ -76,7 +75,6 @@ module Biblio = struct
         | `authors 
         | `title 
         | `how 
-        | `date 
         | `year 
         | `url 
         | `pdfurl 
@@ -133,7 +131,6 @@ module Biblio = struct
       | `authors   -> (f (function `authors  v -> true | _ -> false) entry)
       | `title     -> (f (function `title    v -> true | _ -> false) entry)
       | `how       -> (f (function `how      v -> true | _ -> false) entry)
-      | `date      -> (f (function `date     v -> true | _ -> false) entry)
       | `year      -> (f (function `year     v -> true | _ -> false) entry)
       | `url       -> (f (function `url      v -> true | _ -> false) entry)
       | `pdfurl    -> (f (function `pdfurl   v -> true | _ -> false) entry)
@@ -167,7 +164,6 @@ module Biblio = struct
       | Some (`how how) -> how
       | Some (`year y) -> y
       | Some (`note n) -> n
-      | Some (`date      s) -> s
       | Some (`url       s) -> s
       | Some (`pdfurl    s) -> s
       | Some (`comment (_, s)) -> s
@@ -184,7 +180,6 @@ module Biblio = struct
       | "authors" -> `authors 
       | "title" -> `title 
       | "how" -> `how 
-      | "date" -> `date 
       | "year" -> `year 
       | "url" -> `url 
       | "pdfurl" -> `pdfurl 
@@ -385,8 +380,6 @@ module Parsing = struct
             | Sx.List l -> parse_entry l)
 *)
 end
-
-
 
 
 
@@ -703,7 +696,6 @@ module Format = struct
           strfield ~title_style:`punct `title entry 
       | "@{how}" when is_write stack -> strfield `how entry 
       | "@{year}" when is_write stack -> strfield `year entry 
-      | "@{date}"     when is_write stack -> strfield `date      entry 
       | "@{url}"      when is_write stack -> strfield `url       entry 
       | "@{pdfurl}"   when is_write stack -> strfield `pdfurl    entry 
       | "@{comment}" when is_write stack ->
@@ -774,7 +766,6 @@ The format is a string with special patterns:
     @{how}            : how
     @{year}           : year
     @{note}           : note
-    @{date}           : date
     @{url}            : url
     @{pdfurl}         : pdfurl
     @{comment}        : \"main\" comment

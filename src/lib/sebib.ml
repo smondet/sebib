@@ -45,7 +45,7 @@ module AuthorList = struct
             | [] -> ""
             | [(onef,onel)] -> onel
             | [(onef,onel); (twof,twol) ] -> sprintf "%s and %s" onel twol
-            | (onef,onel) :: l -> onel ^ "et al."
+            | (onef,onel) :: l -> onel ^ " et al."
 
     )
 end

@@ -67,7 +67,8 @@
         (Jéţø Möûdæ)
         (Éşçölœ Ñéèßïù)
     )
-    (title "A Title with ACRONYM, And uppercase Ütf8, also Löwercæsê")
+    (title "A Title with ACRONYM,
+	tabs returns... \r And uppercase Ütf8, also Löwercæsê")
     (how "It is F$#@^!|£%king \£aT€X (©), which will nœvør bî üţf8 compliant")
 )
 

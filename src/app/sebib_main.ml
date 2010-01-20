@@ -32,6 +32,8 @@ let () = (
     let usage = "usage: sebib [OPTIONS] file1.sebib file2.sebib ..." in
     let sort_by = ref "" in
     let output_sebib = ref "" in
+    let transform_format: Sebib.Format.text_transformation ref = ref `no in
+    
     let arg_cmd ~doc key spec = (key, spec, doc) in
     let commands = [
         arg_cmd
@@ -62,6 +64,11 @@ let () = (
             \tsee -help-format")
             "-format"
             (Arg.Set_string out_format);
+        arg_cmd
+            ~doc:"\n\
+            \tReplace all whitespace by sigle spaces in -format's fields (except 'bibtex')"
+            "-format-no-ws"
+            (Arg.Unit (fun () -> transform_format := `no_ws));
         arg_cmd
             ~doc:"\n\
             \tThis is a convenience shortcut for -format \"@{id} \""
@@ -143,7 +150,9 @@ let () = (
     
 
     if !out_format <$> "" then (
-        printf "%s" (Format.str ~pattern:!out_format biblio);
+      let transform_text = !transform_format in
+      let pattern = !out_format in
+        printf "%s" (Format.str ~pattern ~transform_text biblio);
     );
 
     (* printf "END\n%!"; *)

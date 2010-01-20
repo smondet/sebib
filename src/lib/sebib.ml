@@ -737,9 +737,16 @@ end
 
 module Format = struct
 
-  let str ~pattern set = (
-    let rex = Pcre.regexp "@\\{[^\\}]+\\}" in
-    let strfield = Biblio.field_or_empty in
+  type text_transformation = [`no | `no_ws ]
+
+  let str ~pattern ?(transform_text:text_transformation= `no) set = (
+    let rex_field = Pcre.regexp "@\\{[^\\}]+\\}" in
+    let rex_ws = Pcre.regexp "[ \\t\\n\\r]+" in
+    let strfield ?authors_style ?title_style f e =
+      let str = Biblio.field_or_empty ?authors_style ?title_style f e in
+      match transform_text with
+      | `no -> str
+      | `no_ws -> Pcre.substitute ~rex:rex_ws ~subst:(fun _ -> " ") str in
     let sub_eq s i o m =
       if String.length s < o + i then false else (String.sub s i o =$= m) in
     let is_write stack =
@@ -809,7 +816,7 @@ module Format = struct
                        | Pcre.Text t -> if is_write stack then t else ""
                        | Pcre.Delim s -> subs stack entry s
                        | _ -> "")
-                 (Pcre.full_split ~rex pattern)) set))
+                 (Pcre.full_split ~rex:rex_field pattern)) set))
   )
 
     let help = "\

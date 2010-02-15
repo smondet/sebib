@@ -841,7 +841,8 @@ The format is a string with special patterns:
     @{note}           : note
     @{url}            : url
     @{pdfurl}         : pdfurl
-    @{comment}        : \"main\" comment
+    @{comment}        : comment tagged \"main\" (or non-tagged)
+    @{comment-<tag>}  : comment tagged \"tag\"
     @{bibtex}         : The (maybe generated) BibTeX entry
                         (if there's no `bibtex' field, the entry is generated,
                         like for the '-bibtex' option)

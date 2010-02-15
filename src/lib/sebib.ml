@@ -17,8 +17,10 @@ module AuthorList = struct
         match style with
         | `bibtex ->
             String.concat " and "
-                (Ls.map (fun (first, last) ->
-                    sprintf "%s, %s" last first) authors)
+              (Ls.map (function
+                         | ("", last) -> last
+                         |(first, last) -> sprintf "%s, %s" last first)
+                   authors)
         | `comas_and ->
             let lgth = Ls.length authors in
             String.concat ", "

@@ -1,0 +1,5 @@
+description = "Sebib - Bibliographic database based on S-Expressions"
+version="1"
+archive(byte)="sebib.cma"
+archive(native)="sebib.cmxa"
+requires = "extlib, pcre, sexplib.core"

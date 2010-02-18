@@ -7,3 +7,7 @@ LIB_MODULES[] =
 LIB_NAME = sebib
 
 .DEFAULT: $(OCamlLibrary $(LIB_NAME), $(LIB_MODULES))
+
+install_library: sebib.cma sebib.cmxa META
+    ocamlfind install sebib META *.cm[iox] sebib.cma sebib.cmxa
+

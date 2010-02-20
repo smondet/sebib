@@ -65,10 +65,21 @@ let () = (
             "-format"
             (Arg.Set_string out_format);
         arg_cmd
-            ~doc:"\n\
-            \tReplace all whitespace by sigle spaces in -format's fields (except 'bibtex')"
-            "-format-no-ws"
-            (Arg.Unit (fun () -> transform_format := `no_ws));
+          ~doc:"\n\
+            \tReplace all whitespace by sigle spaces in -format's fields \
+            (except 'bibtex')"
+          "-format-no-ws"
+          (Arg.Unit (fun () -> 
+                       transform_format :=
+                         `composition (`no_ws, !transform_format)));
+        arg_cmd
+          ~doc:"\n\
+            \tSanitize -format's fields for latex \
+            (except 'bibtex')"
+          "-format-latex"
+          (Arg.Unit (fun () -> 
+                       transform_format :=
+                         `composition (`latex, !transform_format)));
         arg_cmd
             ~doc:"\n\
             \tThis is a convenience shortcut for -format \"@{id} \""

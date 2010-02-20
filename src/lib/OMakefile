@@ -2,6 +2,7 @@
 LIB_MODULES[] =
     sebib_Yaboon_PolyComp
     sebib_std
+    sebib_sanitize
     sebib
 
 LIB_NAME = sebib

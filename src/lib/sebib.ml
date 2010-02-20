@@ -451,133 +451,6 @@ end
 
 module BibTeX = struct
 
-    (* 
-     This function will always be work-in-progress...
-
-     Special Thanks to Vim (www.vim.org) for easing this editing
-
-     The Comprehensive LaTeX Symbol List
-     www.stat.berkeley.edu/~sourav/symbols-a4.pdf 
-     *)
-    let latexify = function
-
-        | "\\" -> "\\textbackslash{}"
-
-        | "$" -> "\\$"
-        | "%" -> "\\%"
-        | "_" -> "\\_"
-        | "}" -> "\\}"
-        | "&" -> "\\&"
-        | "#" -> "\\#"
-        | "{" -> "\\{"
-        | "^" -> "\\^{}"
-
-        | "á" -> "\\'a"
-        | "é" -> "\\'e"
-        | "í" -> "\\'i"
-        | "ó" -> "\\'o"
-        | "ú" -> "\\'u"
-        | "ý" -> "\\'y"
-
-        | "Á" -> "\\'A"
-        | "É" -> "\\'E"
-        | "Í" -> "\\'I"
-        | "Ó" -> "\\'O"
-        | "Ú" -> "\\'U"
-        | "Ý" -> "\\'Y"
-
-        | "à" -> "\\`a"
-        | "è" -> "\\`e"
-        | "ì" -> "\\`i"
-        | "ò" -> "\\`o"
-        | "ù" -> "\\`u"
-        
-        | "À" -> "\\`A"
-        | "È" -> "\\`E"
-        | "Ì" -> "\\`I"
-        | "Ò" -> "\\`O"
-        | "Ù" -> "\\`U"
-
-        | "â" -> "\\^a"
-        | "ê" -> "\\^e"
-        | "î" -> "\\^i"
-        | "ô" -> "\\^o"
-        | "û" -> "\\^u"
-
-        | "Â" -> "\\^A"
-        | "Ê" -> "\\^E"
-        | "Î" -> "\\^I"
-        | "Ô" -> "\\^O"
-        | "Û" -> "\\^U"
-
-        | "ä" -> "\\\"{a}"
-        | "ë" -> "\\\"{e}"
-        | "ï" -> "\\\"{i}"
-        | "ö" -> "\\\"{o}"
-        | "ü" -> "\\\"{u}"
-        | "ÿ" -> "\\\"{y}"
-
-        | "Ä" -> "\\\"{A}"
-        | "Ë" -> "\\\"{E}"
-        | "Ï" -> "\\\"{I}"
-        | "Ö" -> "\\\"{O}"
-        | "Ü" -> "\\\"{U}"
-        | "Ÿ" -> "\\\"{Y}"
-
-        | "ā" -> "\\={a}"
-        | "ē" -> "\\={e}"
-        | "ī" -> "\\={i}"
-        | "ū" -> "\\={u}"
-
-        | "ş" -> "\\c{s}"
-        | "ç" -> "\\c{c}"
-        | "ţ" -> "\\c{t}"
-
-        | "ñ" -> "\\~{n}"
-        | "Ñ" -> "\\~{N}"
-
-
-        | "ø" -> "\\o{}"
-        | "ß" -> "\\ss{}"
-        | "Ø" -> "\\O{}"
-        | "æ" -> "\\ae{}"
-        | "œ" -> "\\oe{}"
-        | "Æ" -> "\\AE{}"
-        | "Œ" -> "\\OE{}"
-
-        | "«" -> "\\guillemotleft{}"
-        | "‹" -> "\\guilsinglleft{}"
-        | "„" -> "\\quotedblbase{}"
-        | "\"" -> "\\textquotedbl{}"
-        | "»" -> "\\guillemotright{}"
-        | "›" -> "\\guilsinglright{}"
-        | "‚" -> "\\quotesinglbase{}"
-
-        | "£" -> "\\pounds{}"
-        | "€" -> "\\euro{}"
-        | "¥" -> "\\textyen{}"
-        | "₩" -> "\\textwon{}"
-
-        | "©" -> "\\textcopyright{}"
-        | "†" -> "\\textdagger{}"
-        | "‘" -> "\\textquoteleft{}"
-        | "’" -> "\\textquoteright{}"
-        | "‡" -> "\\textdaggerdbl{}"
-        | "®" -> "\\textregistered{}"
-
-        | s -> s
-
-    let sanitize_latex str = (
-        let ascii_buff = Buffer.create 42 in
-        let uchar_string uc =
-            UTF8.init 1 (fun _ -> uc) in
-        UTF8.iter 
-            (fun unicode_char ->
-                 let ministr = uchar_string unicode_char in
-                 Buffer.add_string ascii_buff (latexify ministr);)
-            ((*UTF8.of_string*) str);
-        Buffer.contents ascii_buff
-    )
 
 
     let format_entry entry = (
@@ -586,7 +459,7 @@ module BibTeX = struct
         let leading_whitespace_regexp = 
             Pcre.regexp ~flags:[ `MULTILINE ] "^[ ]*" in
         let field fi entry = 
-            sanitize_latex
+            Sebib_sanitize.utf8_to_latex
                 (Biblio.field_or_empty ~authors_style:`bibtex fi entry) in
         let sanitize_title str =
             let subst s = sprintf "{%s}" s in
@@ -739,16 +612,25 @@ end
 
 module Format = struct
 
-  type text_transformation = [`no | `no_ws ]
+  type text_transformation = [
+  | `no | `no_ws | `latex 
+  | `composition of text_transformation * text_transformation ]
+
+  let rex_ws = Pcre.regexp "[ \\t\\n\\r]+"
+  let rec do_sanitization how what =
+    match how with
+    | `no -> what
+    | `no_ws -> Pcre.substitute ~rex:rex_ws ~subst:(fun _ -> " ") what
+    | `latex -> Sebib_sanitize.utf8_to_latex what
+    | `composition (ha, hb) -> 
+        (do_sanitization ha (do_sanitization hb what))
 
   let str ~pattern ?(transform_text:text_transformation= `no) set = (
     let rex_field = Pcre.regexp "@\\{[^\\}]+\\}" in
-    let rex_ws = Pcre.regexp "[ \\t\\n\\r]+" in
+
     let strfield ?authors_style ?title_style f e =
       let str = Biblio.field_or_empty ?authors_style ?title_style f e in
-      match transform_text with
-      | `no -> str
-      | `no_ws -> Pcre.substitute ~rex:rex_ws ~subst:(fun _ -> " ") str in
+      do_sanitization transform_text str in
     let sub_eq s i o m =
       if String.length s < o + i then false else (String.sub s i o =$= m) in
     let is_write stack =

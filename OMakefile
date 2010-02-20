@@ -1,7 +1,7 @@
 
 
 
-.PHONY: clean update_externals install_library
+.PHONY: clean update_externals install_library reinstall_library uninstall_library
 
 USE_OCAMLFIND = true
 

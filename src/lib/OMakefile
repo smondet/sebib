@@ -11,4 +11,7 @@ LIB_NAME = sebib
 
 install_library: sebib.cma sebib.cmxa META
     ocamlfind install sebib META *.cm[iox] sebib.cma sebib.cmxa sebib.a
+uninstall_library:
+    ocamlfind remove sebib
+reinstall_library: uninstall_library install_library
 

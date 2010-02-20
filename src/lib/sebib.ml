@@ -613,7 +613,7 @@ end
 module Format = struct
 
   type text_transformation = [
-  | `no | `no_ws | `latex 
+  | `no | `no_ws | `latex | `xml
   | `composition of text_transformation * text_transformation ]
 
   let rex_ws = Pcre.regexp "[ \\t\\n\\r]+"
@@ -622,6 +622,7 @@ module Format = struct
     | `no -> what
     | `no_ws -> Pcre.substitute ~rex:rex_ws ~subst:(fun _ -> " ") what
     | `latex -> Sebib_sanitize.utf8_to_latex what
+    | `xml -> Sebib_sanitize.for_xml what
     | `composition (ha, hb) -> 
         (do_sanitization ha (do_sanitization hb what))
 

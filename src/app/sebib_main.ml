@@ -84,6 +84,15 @@ let () = (
                      `composition (`latex, !transform_format)));
     arg_cmd
       ~doc:"\n\
+            \tSanitize -format's fields for XML formats \n\
+            \t(except 'bibtex', format sanitizations can be composed \
+            following \n\tcommand line's order)"
+      "-format-xml"
+      (Arg.Unit (fun () -> 
+                   transform_format :=
+                     `composition (`xml, !transform_format)));
+    arg_cmd
+      ~doc:"\n\
             \tThis is a convenience shortcut for -format \"@{id} \""
       "-ids"
       (Arg.Unit (fun () -> out_format := "@{id} "));

@@ -129,7 +129,16 @@ let utf8_to_latex str = (
   Buffer.contents ascii_buff
 )
 
-
-
+let for_xml str =
+  let buf = Buffer.create 42 in
+  let s = Buffer.add_string buf in
+  let c = Buffer.add_char buf in
+  Str.iter
+    (function
+     | '<' -> s "&lt;"
+     | '>' -> s "&gt;"
+     | '&' -> s "&amp;"
+     | har -> c har) str;
+  (Buffer.contents buf)
 
 

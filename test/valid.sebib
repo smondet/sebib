@@ -12,7 +12,7 @@
     (comment "
         {i|Some comments}, using {t|bracetax}
         we can enter double quotes: \"
-        ")
+        & d \\ dd<s> d")
     (bibtex "
 @inproceedings{most09complete,
  author = {Skevik, Karl-Andr\\'{e} and Siekkinen, Matti and Goebel, Vera and Plagemann, Thomas},

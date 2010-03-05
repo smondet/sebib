@@ -232,7 +232,7 @@ module Parsing = struct
   let fail_bad_field field = 
     let msg =
       sprintf "Parsing Error ununderstandable data for field: \"%s\""
-        (Str.concat " " (Ls.map (fun s -> Sx.to_string_hum s) field)) in
+        (Str.concat ", " (Ls.map (fun s -> Sx.to_string_hum s) field)) in
     raise (Parse_error msg)
       
   let fail_bad_author sexp =
@@ -274,6 +274,15 @@ module Parsing = struct
         ~f:(function
               | [] -> fail_empty None
               | one :: [] -> fail_empty (Some one)
+              | (Sx.Atom h) :: t as l 
+                  when (h =$= "tags") || (h =$= "author") 
+                    || (h =$= "authors") || (h =$= "keywords") ->
+                  begin match h with
+                  | "authors" | "author" -> (`authors (parse_authors t))
+                  | "tags" -> (`tags (parse_atom_list "tag" t))
+                  | "keywords" -> (`keywords (parse_atom_list "keyword" t))
+                  | s -> fail_bad_field l
+                  end
               | (Sx.Atom h1) :: (Sx.Atom h2) :: [] as l ->
                   begin match h1 with
                   | "id" -> its_id := Some h2 ; (`id h2)
@@ -288,19 +297,11 @@ module Parsing = struct
                   | "doi" -> (`doi h2)
                   | "citation" -> (`citation h2)
                   | "comment" -> (`comment ("main", h2))
-                  | "authors" | "author"  -> (`authors [ ("", h2) ])
-                      (* one single-named author *)
                   | s -> fail_bad_field l
                   end
               | (Sx.Atom "comment") :: (Sx.Atom h2) :: (Sx.Atom h3) :: [] ->
                   (`comment (h2, h3))
-              | (Sx.Atom h) :: t as l ->
-                  begin match h with
-                  | "authors" | "author" -> (`authors (parse_authors t))
-                  | "tags" -> (`tags (parse_atom_list "tag" t))
-                  | "keywords" -> (`keywords (parse_atom_list "keyword" t))
-                  | s -> fail_bad_field l
-                  end
+
               | l -> fail_bad_field l)
     in
     match !its_id with

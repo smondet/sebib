@@ -8,48 +8,54 @@ module Info = struct
 end
 
 module AuthorList = struct
-    type author = string * string
-    type t = author list
+  type author = string * string
+  type t = author list
 
-    type style = [ `comas_and | `acm | `bibtex | `comas | `et_al ]
-
-    let to_string ?(style:style=`comas) authors = (
-        match style with
-        | `bibtex ->
-            String.concat " and "
-              (Ls.map (function
-                         | ("", last) -> last
-                         |(first, last) -> sprintf "%s, %s" last first)
-                   authors)
-        | `comas_and ->
-            let lgth = Ls.length authors in
-            String.concat ", "
-                (Ls.mapi (fun i (first, last) ->
-                    let strand =
+  type style = [ `comas_and | `acm | `bibtex | `comas | `et_al ]
+  let initials first_name =
+    if Str.length first_name = 0 then None else
+      Some ((Str.concat ". "
+               (Ls.map ~f:(fun s -> Str.sub s 0 1)
+                  (Ls.filter ~f:(fun s -> Str.length s > 0)
+                     (Str.nsplit first_name " ")))) ^ ".")
+          
+  let to_string ?(style:style=`comas) authors =
+    match style with
+    | `bibtex ->
+        String.concat " and "
+          (Ls.map (function
+                   | ("", last) -> last
+                   |(first, last) -> sprintf ") %s, %s" last first)
+             authors)
+    | `comas_and ->
+        let lgth = Ls.length authors in
+        String.concat ", "
+          (Ls.mapi (fun i (first, last) ->
+                      let strand =
                         if i = lgth - 1 && i <> 0 then "and " else "" in
-                    sprintf "%s%s %s" strand first last) authors)
-        | `comas -> 
-            String.concat ", "
-                (Ls.map (fun (first, last) ->
-                    sprintf "%s %s" first last) authors)
-        | `acm -> 
-            let lgth = Ls.length authors in
-            String.concat ", "
-                (Ls.mapi (fun i (first, last) ->
-                    let strand =
+                      sprintf "%s%s %s" strand first last) authors)
+    | `comas -> 
+        String.concat ", "
+          (Ls.map (fun (first, last) ->
+                     sprintf "%s %s" first last) authors)
+    | `acm -> 
+        let lgth = Ls.length authors in
+        String.concat ", "
+          (Ls.mapi (fun i (first, last) ->
+                      let strand =
                         if i = lgth - 1 && i <> 0 then "and " else "" in
-                    let initial =
-                        if String.length first = 0 
-                        then '_' else first.[0] in
-                    sprintf "%s%s, %c." strand last initial) authors)
-        | `et_al ->
-            match authors with
-            | [] -> ""
-            | [(onef,onel)] -> onel
-            | [(onef,onel); (twof,twol) ] -> sprintf "%s and %s" onel twol
-            | (onef,onel) :: l -> onel ^ " et al."
+                      let initials_str =
+                        match initials first with
+                        | None -> ""
+                        | Some s -> ", " ^ s in
+                      sprintf "%s%s%s" strand last initials_str) authors)
+    | `et_al ->
+        match authors with
+        | [] -> ""
+        | [(onef,onel)] -> onel
+        | [(onef,onel); (twof,twol) ] -> sprintf "%s and %s" onel twol
+        | (onef,onel) :: l -> onel ^ " et al."
 
-    )
 end
 
 module Biblio = struct

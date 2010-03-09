@@ -25,7 +25,7 @@ module AuthorList = struct
         String.concat " and "
           (Ls.map (function
                    | ("", last) -> last
-                   |(first, last) -> sprintf ") %s, %s" last first)
+                   |(first, last) -> sprintf " %s, %s" last first)
              authors)
     | `comas_and ->
         let lgth = Ls.length authors in

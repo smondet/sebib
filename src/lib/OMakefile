@@ -18,3 +18,8 @@ reinstall_library: $(LIB_NAME).cma $(LIB_NAME).cmxa META
     ocamlfind remove $(LIB_NAME)
     ocamlfind install $(LIB_NAME) META *.cm[iox] $(LIB_NAME).cma $(LIB_NAME).cmxa $(LIB_NAME).a
 
+index.html: $(LIB_NAME).cma sebib.ml
+    ocamlfind ocamldoc -package extlib,pcre,sexplib.core \
+      -d . -t "Bracetax Library"   -html -colorize-code sebib.ml -sort -I .
+
+doc_library: index.html

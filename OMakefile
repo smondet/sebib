@@ -3,7 +3,7 @@
 
 .PHONY: clean update_externals \
  install_library reinstall_library uninstall_library \
- doc_site
+ doc_site doc_library
 
 USE_OCAMLFIND = true
 

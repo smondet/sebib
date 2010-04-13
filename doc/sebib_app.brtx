@@ -3,8 +3,8 @@
 
 {section 1 sec:usage|Command Line Options}
 
-As {q|{t|sebib -help}} says, the usage is
-{t|sebib [OPTIONS] file1.sebib file2.sebib ...} and
+As the command {q|{t|sebib -help}} nicely says, the usage is
+{code}sebib [OPTIONS] file1.sebib file2.sebib ...{end} and
 the options are:
 # sebib -help | sed -e 's/\([{}#]\)/{\1}/g' | sed -e 's/^  \(-.*\) *$/{*}{b|{t|\1}} :/'
 {begin list}
@@ -48,7 +48,7 @@ the options are:
 	Help about the -select option
 {*}{b|{t|-version }} :
 	Print version
-{*}{t|-help},{t|--help}:  Display this list of options
+{*}{b|{t|-help}},{b|{t|--help}}:  Display this list of options
 {end}
 
 {section 1 sec:help_format|The {t|-format} Syntax}
@@ -118,11 +118,19 @@ Queries are S-Expressions
         The regexp syntax is Perl-Compatible
 {*}{t|(has {t|<field>})}:
          the field is present
-        functionally equivalent to (matches ({t|<field>} ""))
+        functionally equivalent to {t|(matches ({t|<field>} ""))}
 {end}
 
 
 
 {section 1 sec:examples|Examples}
 
-TODO
+Let's say you have two bibliography files:
+{t|improba_drive_tech.sebib} and
+{t|smone_else_pb_tech.sebib}
+(the file-extensions do not have necessarily to be {t|.sebib}).
+
+
+
+
+{p}{b|TODO{~}{...}}

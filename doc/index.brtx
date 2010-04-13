@@ -17,7 +17,7 @@ Here are the documentations available:
 {begin list}
 {*} {link ./sebib_format.html|Documentation of the file format}.
 {*} {link ./build_install.html|Building and Installing}.
-{*} Documentation of the {t|sebib} command line tool.
+{*} {link ./sebib_app.html|Documentation of the {t|sebib} command line tool}.
 {*} {link ./doclib/index.html |Documentation of the library}.
 {end}
 

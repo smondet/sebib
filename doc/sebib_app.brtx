@@ -1,0 +1,128 @@
+{header|{title|The Sebib Command Line Tool}}
+
+
+{section 1 sec:usage|Command Line Options}
+
+As {q|{t|sebib -help}} says, the usage is
+{t|sebib [OPTIONS] file1.sebib file2.sebib ...} and
+the options are:
+# sebib -help | sed -e 's/\([{}#]\)/{\1}/g' | sed -e 's/^  \(-.*\) *$/{*}{b|{t|\1}} :/'
+{begin list}
+{*}{b|{t|-validate }} :
+	Validate the files, continues if OK, exits(2) if not
+{*}{b|{t|-bibtex-able }} :
+	Checks that every entry has either a 'bibtex' field or
+	is able to build an acceptable @misc entry (id, title, how),
+	continues if OK, exits(3) if not
+{*}{b|{t|-stdin }} :
+	Also use stdin as input
+{*}{b|{t|-bibtex <file>}} :
+	Output a BibTeX file (- for stdout)
+{*}{b|{t|-sebib <file>}} :
+	Output a Sebib file (- for stdout)
+{*}{b|{t|-format <string>}} :
+	Output to stdout using the <string> format for each entry
+	see -help-format
+{*}{b|{t|-format-no-ws }} :
+	Replace all whitespace by sigle spaces in -format's fields 
+	(except 'bibtex', format sanitizations can be composed following 
+	command line's order)
+{*}{b|{t|-format-latex }} :
+	Sanitize -format's fields for latex 
+	(except 'bibtex', format sanitizations can be composed following 
+	command line's order)
+{*}{b|{t|-format-xml }} :
+	Sanitize -format's fields for XML formats 
+	(except 'bibtex', format sanitizations can be composed following 
+	command line's order)
+{*}{b|{t|-ids }} :
+	This is a convenience shortcut for -format "@{{}id{}} "
+{*}{b|{t|-select <s-expr>}} :
+	Filter the bibliography with a query
+	see -help-select
+{*}{b|{t|-sort <field>}} :
+	Sort the bibliography following alphabetical order on a given field
+{*}{b|{t|-help-format }} :
+	Help about the -format option
+{*}{b|{t|-help-select }} :
+	Help about the -select option
+{*}{b|{t|-version }} :
+	Print version
+{*}{t|-help},{t|--help}:  Display this list of options
+{end}
+
+{section 1 sec:help_format|The {t|-format} Syntax}
+
+This is given by {q|{t|sebib -help-format}}.  The {i|format} is a
+string with special tokens which are interpreted as commands:
+{begin list}
+# sebib -help-format | sed -e 's/\([{}#]\)/{\1}/g' | sed -e 's/^ *\(@.*\):/{*}{t|\1}:/'
+{*}{t|@{{}id{}}             }: id
+{*}{t|@{{}authors{}}        }: authors (coma separated list)
+{*}{t|@{{}authors-and{}}    }: authors (comas and a 'and' for the last one)
+{*}{t|@{{}authors-bibtex{}} }: authors (BibTeX friendly format)
+{*}{t|@{{}authors-acm{}}    }: authors (like ACM Ref, with initials)
+{*}{t|@{{}authors-etal{}}   }: authors 
+                        (Depending on the number of authors:
+                            1: Lastname
+                            2: Lastname1 and Lastname2
+                            more: Lastname1 et al.)
+{*}{t|@{{}title{}}          }: title
+{*}{t|@{{}title-punct{}}    }: the title with a dot '.' 
+                        if not already ending with '?', '.', or '!'
+{*}{t|@{{}how{}}            }: how
+{*}{t|@{{}year{}}           }: year
+{*}{t|@{{}note{}}           }: note
+{*}{t|@{{}url{}}            }: url
+{*}{t|@{{}pdfurl{}}         }: pdfurl
+{*}{t|@{{}comment{}}        }: comment tagged "main" (or non-tagged)
+{*}{t|@{{}comment-<tag>{}}  }: comment tagged "tag"
+{*}{t|@{{}bibtex{}}         }: The (maybe generated) BibTeX entry
+                        (if there's no `bibtex' field, the entry is generated,
+                        like for the '-bibtex' option)
+{*}{t|@{{}abstract{}}       }: abstract
+{*}{t|@{{}doi{}}            }: doi
+{*}{t|@{{}citation{}}       }: citation
+{*}{t|@{{}tags{}}           }: tags (coma separated list)
+{*}{t|@{{}keywords{}}       }: keywords (coma separated list)
+{*}{t|@{{}@{}}              }: the '@' character
+{*}{t|@{{}n{}}              }: the new-line character
+{*}{t|@{{}if <expr>{}} AAA @{{}else{}} BBB @{{}endif{}} }:
+               Evaluates <expr> for the entry,
+               if true, displays AAA, if not, BBB.
+               (<expr> uses the same syntax as the '-select' option, 
+               see 'sebib -help-select')
+
+{end}
+
+
+
+{section 1 sec:help_format|The {t|-select} Syntax}
+
+This is given by {q|{t|sebib -help-select}}. 
+Queries are S-Expressions
+# sebib -help-select | sed -e 's/\([{}#]\)/{\1}/g' | sed -e 's/^ *\((.*)\)/{*}{t|\1}:/' | sed -e 's/\(<[a-z0-9]*>\)/{t|\1}/g' | sed -e 's/->//g' 
+{begin list}
+{*}{t|(ids {t|<id1>} {t|<id2>} {t|<id3>} ...)}:
+         the items whose ids are {t|<id1>}, {t|<id2>}, ...
+{*}{t|(and {t|<expr1>} {t|<expr2>} ...)}:
+         logical "and" between expressions
+{*}{t|(or {t|<expr1>} {t|<expr2>} ...)}:
+         logical "or" between expressions
+{*}{t|(not {t|<expr>})}:
+         logical negation of an expression
+{*}{t|(tags {t|<tag1>} {t|<tag2>} {t|<tag3>})}:
+         look for the tags (it is an intersection, i.e. an "and")
+{*}{t|(matches {t|<field>} {t|<regexp>})}:
+         look if you find {t|<regexp>} in {t|<field>}
+        The regexp syntax is Perl-Compatible
+{*}{t|(has {t|<field>})}:
+         the field is present
+        functionally equivalent to (matches ({t|<field>} ""))
+{end}
+
+
+
+{section 1 sec:examples|Examples}
+
+TODO

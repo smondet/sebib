@@ -1,0 +1,29 @@
+{header|{title|Sebib: S-Expressions for BIBliography}}
+
+
+{section 1 sec:present|Presentation}
+
+
+{section 1 sec:documentations|Documentation}
+
+
+{begin list}
+{*} Documentation of the file format.
+{*} Building and Installing.
+{*} Documentation of the {t|sebib} command line tool.
+{*} Documentation of the library.
+{end}
+
+{section 1 sec:download|Download}
+
+{section 1 sec:authors|Authors, License, etc.}
+
+{i|Sebib} is developed by 
+{link http://seb.mondet.org
+|Sebastien Mondet}.
+It is available under a permissive
+{link http://en.wikipedia.org/wiki/MIT_License
+|MIT license}.
+Any contributions, such as bug reports, feature requests,
+patches, or critics are more than welcomed.
+

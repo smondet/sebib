@@ -1,0 +1,10 @@
+
+HTML_Page(name, title) =
+  $ (name).html: $(name).brtx
+    brtx -i $ (name).brtx -o $(name).html -doc -title $(title)
+
+
+HTML_Page(index, "Sebib doc - index")
+
+doc_site: index.html
+

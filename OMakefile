@@ -1,7 +1,9 @@
 
 
 
-.PHONY: clean update_externals install_library reinstall_library uninstall_library
+.PHONY: clean update_externals \
+ install_library reinstall_library uninstall_library \
+ doc_site
 
 USE_OCAMLFIND = true
 
@@ -36,10 +38,12 @@ update_externals: # Go for the last version
 
 
 if $(not $(file-exists _build/))
-    mkdir -p _build/lib _build/app
+    mkdir -p _build/lib _build/app _build/doc
 
-vmount(-l, src/, _build/)
+vmount(-l, src/lib, _build/lib)
+vmount(-l, src/app, _build/app)
+vmount(-l, doc, _build/doc)
 
 
-.SUBDIRS: _build/lib _build/app
+.SUBDIRS: _build/lib _build/app _build/doc/
 

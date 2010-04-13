@@ -1,20 +1,29 @@
-{header|{title|Sebib: S-Expressions for BIBliography}}
+
+{header|
+{title|Sebib: S-Expressions for BIBliography}
+}
 
 
 {section 1 sec:present|Presentation}
 
+The {i|Sebib} project aims at providing highly hackable
+{i|{q|Bibliographic References Management System}}.  It is a library and a
+command-line application which handle an ad-hoc file format based on
+{link http://en.wikipedia.org/wiki/S-expression |S-Expressions}.
 
 {section 1 sec:documentations|Documentation}
 
-
+Here are the documentations available:
 {begin list}
-{*} Documentation of the file format.
-{*} Building and Installing.
+{*} {link ./sebib_format.html|Documentation of the file format}.
+{*} {link ./build_install.html|Building and Installing}.
 {*} Documentation of the {t|sebib} command line tool.
 {*} {link ./doclib/index.html |Documentation of the library}.
 {end}
 
 {section 1 sec:download|Download}
+
+No downloads for now.
 
 {section 1 sec:authors|Authors, License, etc.}
 

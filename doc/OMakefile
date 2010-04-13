@@ -6,6 +6,8 @@ HTML_Page(name, title) =
 
 
 HTML_Page(index, "Sebib doc - index")
+HTML_Page(build_install, "Sebib doc - Build & Install")
+HTML_Page(sebib_format, "Sebib doc - File Format")
 
-doc_site: index.html sebib.css
+doc_site: index.html build_install.html sebib_format.html sebib.css
 

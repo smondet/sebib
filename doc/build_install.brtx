@@ -1,0 +1,24 @@
+{header|{title|Build & Install Sebib}}
+
+{section 1 sec:dependencies|Dependencies}
+
+Sebib depends on 3 libraries:
+
+{begin list}
+{*}
+{link http://code.google.com/p/ocaml-extlib/
+|ExtLib}
+{*} {t|pcre}
+{link http://www.ocaml.info/home/ocaml_sources.html
+|OCaml-PCRE}
+{*} 
+{link http://www.janestreet.com/ocaml/index.html
+|Sexplib}
+(we use only {t|sexplib.core}, no Camlp4).
+{end}
+
+
+{section 1 sec:omake|Use Omake}
+
+{b|TODO}
+

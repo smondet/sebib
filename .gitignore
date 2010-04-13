@@ -1,5 +1,6 @@
 sebib
-src/*.cmo
-src/*.cmi
-src/*.annot
 *~
+.omake*
+*.omc
+_build/*
+website/

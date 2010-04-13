@@ -11,7 +11,7 @@
 {*} Documentation of the file format.
 {*} Building and Installing.
 {*} Documentation of the {t|sebib} command line tool.
-{*} Documentation of the library.
+{*} {link ./doclib/index.html |Documentation of the library}.
 {end}
 
 {section 1 sec:download|Download}

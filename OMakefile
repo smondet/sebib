@@ -3,7 +3,7 @@
 
 .PHONY: clean update_externals \
  install_library reinstall_library uninstall_library \
- doc_site doc_library
+ doc_site doc_library web_site
 
 USE_OCAMLFIND = true
 
@@ -46,4 +46,12 @@ vmount(-l, doc, _build/doc)
 
 
 .SUBDIRS: _build/lib _build/app _build/doc/
+
+WEB_DIR=website
+web_site: doc_site doc_library
+    rm -fr $(WEB_DIR)
+    mkdir -p $(WEB_DIR)/doclib
+    cp -f _build/doc/*.html  $(WEB_DIR)/
+    cp -f _build/lib/*.html _build/lib/*.css $(WEB_DIR)/doclib/
+
 

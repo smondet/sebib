@@ -1,0 +1,16 @@
+
+body {
+    margin-left: 1em;
+    max-width: 60em;
+    font-size: 90%;
+}
+div.p {
+    margin-top: 0.1em;margin-bottom: 0.6em;
+}
+div.header {
+    text-align: center;
+    border: #3E4676 solid;
+    padding-top:    2.1em;
+    padding-bottom: 2.05em;
+    margin-bottom: 3em;
+}

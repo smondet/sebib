@@ -1,10 +1,11 @@
 
 HTML_Page(name, title) =
   $ (name).html: $(name).brtx
-    brtx -i $ (name).brtx -o $(name).html -doc -title $(title)
+    brtx -i $(name).brtx -o $(name).html \
+	-doc -title $(title) -link-css sebib.css
 
 
 HTML_Page(index, "Sebib doc - index")
 
-doc_site: index.html
+doc_site: index.html sebib.css
 

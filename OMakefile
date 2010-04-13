@@ -51,7 +51,7 @@ WEB_DIR=website
 web_site: doc_site doc_library
     rm -fr $(WEB_DIR)
     mkdir -p $(WEB_DIR)/doclib
-    cp -f _build/doc/*.html  $(WEB_DIR)/
+    cp -f _build/doc/*.html _build/doc/*.css $(WEB_DIR)/
     cp -f _build/lib/*.html _build/lib/*.css $(WEB_DIR)/doclib/
 
 

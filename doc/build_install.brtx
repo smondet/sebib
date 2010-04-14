@@ -28,9 +28,37 @@ need the library).
 
 {section 1 sec:omake|Use OMake}
 
-{b|TODO}
+Just by typing:
+{code}
+omake
+{end}
+should check the libraries, and compile everything. {p}
+
+You have then these executable binaries:
+{list|
+{*} {t|_build/app/sebib.run},
+{*} and preferably, {t|_build/app/sebib.opt} (if your architecture
+does not support native compilation you won't have this one).  }
+Move and rename one of them to somewhere in your {t|$PATH}, and you
+have installed the application. {p}
+
+To install the library, just do:
+{code}
+omake install_library
+{end}
+This will install the {t|sebib} library using {i|findlib}, depending
+on your OCaml setup this may require {t|root} privileges. {p}
+
+Other OMake targets may be useful: {t|doc_site}, {t|doc_library},
+{t|web_site}, or {t|clean}.
 
 {section 1 sec:noomake|Without OMake}
 
-{b|TODO}
-
+If you do not have OMake you can get easily the {t|sebib} application
+compiled, just run this command:
+{code}
+ocamlfind ocamlopt -package extlib,pcre,sexplib.core -linkpkg \
+          src/lib/sebib_Yaboon_PolyComp.ml \
+          src/lib/sebib_std.ml src/lib/sebib_sanitize.ml src/lib/sebib.ml \
+          src/app/sebib_main.ml -I . -I src/lib -o sebib
+{end}

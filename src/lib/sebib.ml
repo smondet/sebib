@@ -248,10 +248,16 @@ module Biblio = struct
 
 end
 
+(** Parsing of the {i Sebib file format}. *)
 module Parsing = struct
+  (**/**)
+
   module Sx = Sexplib.Sexp
+  (**/**)
     
   exception Parse_error of string
+
+  (**/**)
 
   (* Error when an Atom is found instead of a list. *)
   let fail_atom s =
@@ -347,7 +353,11 @@ module Parsing = struct
     | None -> fail_no_id field_sexp_list
     | Some id -> (id, (its_fields : Biblio.entry))
 
-  let rec parse str =
+  (**/**)
+
+
+  (** Convert a string to a bibliography. *)
+  let rec parse str : Biblio.set =
     (* let sexps = Sx.load_sexps str in ---> only for file names *)
     let valid_and_parse_entry sexp =
       match sexp with
@@ -408,7 +418,9 @@ module Parsing = struct
 
 end
 
+(** Output of {i Sebib} files. *)    
 module Printing = struct
+  (**/**)
 
   let field_name : Biblio.field_name -> string = function
     | `id ->         "id"
@@ -426,8 +438,11 @@ module Printing = struct
     | `citation ->   "citation"
     | `tags ->       "tags" 
     | `keywords ->   "keywords"
+  (**/**)
 
-  let print chan bib_set =
+
+  (** Output a bibliography set. *)
+  let print chan (bib_set: Biblio.set) =
     let rex = Pcre.regexp "^[A-Za-z0-9\\?\\!\\-\\:\\/\\.\\,\\~]+$" in
     let out_str s =
       let escape = 
@@ -488,53 +503,55 @@ end
 
 
 
-
+(** Output BibTeX files. *)
 module BibTeX = struct
-
-
-
-    let format_entry entry = (
-        (* The regexps are compiled at each call. TODO: module-local cache ?  *)
-        let capitals_regexp = Pcre.regexp "[A-Z]+" in
-        let leading_whitespace_regexp = 
-            Pcre.regexp ~flags:[ `MULTILINE ] "^[ ]*" in
-        let field fi entry = 
-            Sebib_sanitize.utf8_to_latex
-                (Biblio.field_or_empty ~authors_style:`bibtex fi entry) in
-        let sanitize_title str =
-            let subst s = sprintf "{%s}" s in
-            Pcre.substitute ~rex:capitals_regexp ~subst str in
-        match Biblio.find_field `bibtex entry with
-        | Some (`bibtex b) ->
-              Pcre.substitute ~rex:leading_whitespace_regexp
-                  ~subst:(fun s -> "") b
-        | _ ->
-            sprintf "@misc{%s,\n\
+  (**/**)
+  let format_entry entry =
+    (* The regexps are compiled at each call.
+       TODO: module-local cache ?  *)
+    let capitals_regexp = Pcre.regexp "[A-Z]+" in
+    let leading_whitespace_regexp = 
+      Pcre.regexp ~flags:[ `MULTILINE ] "^[ ]*" in
+    let field fi entry = 
+      Sebib_sanitize.utf8_to_latex
+        (Biblio.field_or_empty ~authors_style:`bibtex fi entry) in
+    let sanitize_title str =
+      let subst s = sprintf "{%s}" s in
+      Pcre.substitute ~rex:capitals_regexp ~subst str in
+    match Biblio.find_field `bibtex entry with
+    | Some (`bibtex b) ->
+        Pcre.substitute ~rex:leading_whitespace_regexp
+          ~subst:(fun s -> "") b
+    | _ ->
+        sprintf "@misc{%s,\n\
                 author = {%s},\n\
                 title = {%s},\n\
                 howpublished = {%s},\n\
                 year = {%s},\n\
                 note = {%s}\n\
                 }\n"
-                (field `id entry)
-                (field `authors entry)
-                (sanitize_title (field `title entry))
-                (field `how entry)
-                (field `year entry)
-                (field `note entry)
-    )
-
-    let str set = (
-        String.concat "\n\n" (List.map format_entry set)
-    )
+          (field `id entry)
+          (field `authors entry)
+          (sanitize_title (field `title entry))
+          (field `how entry)
+          (field `year entry)
+          (field `note entry)
+          
+  (**/**)
+          
+  (** Convert a bibliography set to a BibTeX string *)
+  let str (set:Biblio.set) =
+    String.concat "\n\n" (List.map format_entry set)
+  
 end
 
-(** The "-select" domain specific language *)
+(** The domain specific language of the "-select" option. *)
 module Request = struct
   
+  (** The type of the expressions. *)
   type t = [
   | `list_and of t list
-  | `la of t list
+  | `la of t list (** [`la] is a shortcut for [`list_and] *)
   | `list_or of t list
   | `lo of t list
   | `not of t
@@ -543,12 +560,15 @@ module Request = struct
   | `tags of string list
   | `has of Biblio.field_name
   ]
-  
+  (**/**)
   module Sx = Sexplib.Sexp
-    
+  
+  (**/**)
+  
   exception Parse_error of string
 
-  let of_string str =
+  (** Parse the S-Expression reprenseting the request. *)
+  let of_string str : t =
     let fail msg =
       raise (Parse_error (sprintf "Request Syntax Error: %s" msg)) in
     let atom_list l =
@@ -590,38 +610,40 @@ module Request = struct
     in
     (parse_expr sexp)
 
-    let rec is_ok entry (req:t) = (
-        match req with
-        | `list_and l | `la l -> Ls.for_all (is_ok entry) l
-        | `list_or l | `lo l -> Ls.exists (is_ok entry) l
-        | `not t -> not (is_ok entry t)
-        | `matches (f,r) -> 
-            let str = Biblio.field_or_empty f entry in
-            let rex = Pcre.regexp r in
-            (str <$> "") && (Pcre.pmatch ~rex str)
-        | `ids l ->
-            let idstr = Biblio.field_or_empty `id entry in
-            Ls.exists ((=$=) idstr) l
-        | `tags tags_request -> 
-            begin match Biblio.find_field `tags entry with
-            | Some (`tags tag_list) ->
-                Ls.for_all
-                    (fun tag -> Ls.exists ((=$=) tag) tag_list)
-                    tags_request
-            | _ -> false
-            end
-        | `has f -> 
-            begin match Biblio.find_field f entry with
-            | Some _ -> true
-            | None -> false
-            end
+  (**/**)
+  let rec is_ok entry (req:t) =
+    match req with
+    | `list_and l | `la l -> Ls.for_all (is_ok entry) l
+    | `list_or l | `lo l -> Ls.exists (is_ok entry) l
+    | `not t -> not (is_ok entry t)
+    | `matches (f,r) -> 
+        let str = Biblio.field_or_empty f entry in
+        let rex = Pcre.regexp r in
+        (str <$> "") && (Pcre.pmatch ~rex str)
+    | `ids l ->
+        let idstr = Biblio.field_or_empty `id entry in
+        Ls.exists ((=$=) idstr) l
+    | `tags tags_request -> 
+        begin match Biblio.find_field `tags entry with
+        | Some (`tags tag_list) ->
+            Ls.for_all
+              (fun tag -> Ls.exists ((=$=) tag) tag_list)
+              tags_request
+        | _ -> false
+        end
+    | `has f -> 
+        begin match Biblio.find_field f entry with
+        | Some _ -> true
+        | None -> false
+        end
 
-    )
+  (**/**)  
 
-    let exec req set = (
-        Ls.filter (fun e -> is_ok e req) set
-    )
-    let help = "\
+  (** Execute a request; i.e. filter the bibliography set. *)
+  let exec req (set:Biblio.set) : Biblio.set = Ls.filter (fun e -> is_ok e req) set
+    
+  (** The help message about the syntax of the ([string]) requests. *)
+  let help = "\
 Syntax of the '-select' expressions (all parentheses are important):
     (ids <id1> <id2> <id3> ...)
         -> the items whose ids are <id1>, <id2>, ...
@@ -650,12 +672,16 @@ Examples:
 
 end
 
+(** The "-format" language. *)
 module Format = struct
 
+  (** The possible transformations/sanitizations that can be done on
+  the output. *)
   type text_transformation = [
   | `no | `no_ws | `latex | `xml
   | `composition of text_transformation * text_transformation ]
 
+  (**/**)
   let rex_ws = Pcre.regexp "[ \\t\\n\\r]+"
   let rec do_sanitization how what =
     match how with
@@ -666,7 +692,11 @@ module Format = struct
     | `composition (ha, hb) -> 
         (do_sanitization ha (do_sanitization hb what))
 
-  let str ~pattern ?(transform_text:text_transformation= `no) set = (
+  (**/**)
+
+  (** Execute a pattern on a bibliography set with an optional
+  transformation. *)
+  let str ~pattern ?(transform_text:text_transformation= `no) (set:Biblio.set) =
     let rex_field = Pcre.regexp "@\\{[^\\}]+\\}" in
 
     let strfield ?authors_style ?title_style f e =
@@ -742,8 +772,8 @@ module Format = struct
                        | Pcre.Delim s -> subs stack entry s
                        | _ -> "")
                  (Pcre.full_split ~rex:rex_field pattern)) set))
-  )
-
+      
+  (** The help message about the syntax of the format strings. *)
     let help = "\
 The format is a string with special patterns:
     @{id}             : id

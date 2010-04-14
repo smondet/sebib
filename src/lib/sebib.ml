@@ -1,25 +1,43 @@
+(** The toplevel {i Sebib} module. *)
+
+
 
 open Sebib_std
 
+(** Information about the library (version). *)
 module Info = struct
-    let version = "0"
-    let version_string = sprintf "SeBib v. %s" version
+
+  (** The version number string. *)
+  let version = "0"
+
+  (** The version string with the name of the library. *)
+  let version_string = sprintf "SeBib v. %s" version
 
 end
 
+(** Module managing the lists of authors. *)
 module AuthorList = struct
+
+  (** The type of authors: [(first_name, family_name)] *)
   type author = string * string
+
+  (** The type of the author lists. *)
   type t = author list
 
+  (** The formatting style available. *)
   type style = [ `comas_and | `acm | `bibtex | `comas | `et_al ]
+
+  (**/**)
   let initials first_name =
     if Str.length first_name = 0 then None else
       Some ((Str.concat ". "
                (Ls.map ~f:(fun s -> Str.sub s 0 1)
                   (Ls.filter ~f:(fun s -> Str.length s > 0)
                      (Str.nsplit first_name " ")))) ^ ".")
+  (**/**)
           
-  let to_string ?(style:style=`comas) authors =
+  (** Convert a list of authors to a formatted string. *)
+  let to_string ?(style:style=`comas) (authors:t) =
     match style with
     | `bibtex ->
         String.concat " and "
@@ -58,68 +76,77 @@ module AuthorList = struct
 
 end
 
+(** Module handling the whole bibliography. *)
 module Biblio = struct
 
-    type field = [
-        | `id of string
-        | `authors of AuthorList.t
-        | `title of string
-        | `how of string
-        | `year of string
-        | `url of string
-        | `pdfurl of string
-        | `comment of string * string
-        | `bibtex of string
-        | `note of string
-        | `abstract of string
-        | `doi of string
-        | `citation of string
-        | `tags of string list
-        | `keywords of string list
-    ]
+  (** The type of {i fields}. *)
+  type field = [
+  | `id of string
+  | `authors of AuthorList.t
+  | `title of string
+  | `how of string
+  | `year of string
+  | `url of string
+  | `pdfurl of string
+  | `comment of string * string
+  | `bibtex of string
+  | `note of string
+  | `abstract of string
+  | `doi of string
+  | `citation of string
+  | `tags of string list
+  | `keywords of string list
+  ]
 
-    type field_name = [
-        | `id 
-        | `authors 
-        | `title 
-        | `how 
-        | `year 
-        | `url 
-        | `pdfurl 
-        | `comment of string
-        | `bibtex 
-        | `note 
-        | `abstract 
-        | `doi 
-        | `citation 
-        | `tags 
-        | `keywords 
-    ]
+  (** The names of the fields (useful for querying). *)
+  type field_name = [
+  | `id 
+  | `authors 
+  | `title 
+  | `how 
+  | `year 
+  | `url 
+  | `pdfurl 
+  | `comment of string
+  | `bibtex 
+  | `note 
+  | `abstract 
+  | `doi 
+  | `citation 
+  | `tags 
+  | `keywords 
+  ]
 
-    type entry = field list
+  (** One entry is a list of fields. *)
+  type entry = field list
 
-    type set = entry list
+  (** A bibliography is a list of entries. *)
+  type set = entry list
 
-
-    let is_valid set   = (
-      let invalids =
-        Ls.find_all
-          (fun entry ->
-             not (Ls.exists
-                    (function `id _ -> true | _ -> false) entry))
-          set in
-      match invalids with
-      | [] -> `yes
-      | l -> `no l
-    )
-
-    let is_bibtexable set = (
-        let has_bibtex =
-            Ls.exists ~f:(function `bibtex _ -> true | _ -> false) in
-        let is_miscable e =
-            (Ls.exists (function `id _ -> true | _ -> false) e) &&
-            (Ls.exists (function `title _ -> true | _ -> false) e) &&
-            (* (Ls.exists (function `authors _ -> true | _ -> false) e) && *)
+  (** Check the validity of the set (i.e. that each entry has an [`id]
+      field, if not it returns the list of entries that are wrong. *)
+  let is_valid (set:set) : [ `yes | `no of (entry list)] =
+    let invalids =
+      Ls.find_all
+        (fun entry ->
+           not (Ls.exists
+                  (function `id _ -> true | _ -> false) entry))
+        set in
+    match invalids with
+    | [] -> `yes
+    | l -> `no l
+        
+  (** Check that the bibliography is {i compatible} with BibTeX
+      generation, i.e. that it either has a [`bibtex] field, or has an
+      [`id], a [`title], and a [`how] (in order to build a '\@misc'
+      BibTeX entry). *)
+  let is_bibtexable (set:set) : [ `yes | `no of (entry list)] =
+    let has_bibtex =
+      Ls.exists ~f:(function `bibtex _ -> true | _ -> false) in
+    let is_miscable e =
+      (Ls.exists (function `id _ -> true | _ -> false) e) &&
+        (Ls.exists (function `title _ -> true | _ -> false) e) &&
+        (* (Ls.exists (function `authors _ -> true | _ -> false) e) && *)
             (Ls.exists (function `how _ -> true | _ -> false) e)
             (* (Ls.exists (function `year _ -> true | _ -> false) e) *)
         in
@@ -130,88 +157,94 @@ module Biblio = struct
         match invalids with
         | [] -> `yes
         | l -> `no l
-    )
+    
 
-    let find_field (field:field_name) (entry:entry) =
-      let f  = Ls.find_opt in
-      match field with
-      | `id        -> (f (function `id       v -> true | _ -> false) entry)
-      | `authors   -> (f (function `authors  v -> true | _ -> false) entry)
-      | `title     -> (f (function `title    v -> true | _ -> false) entry)
-      | `how       -> (f (function `how      v -> true | _ -> false) entry)
-      | `year      -> (f (function `year     v -> true | _ -> false) entry)
-      | `url       -> (f (function `url      v -> true | _ -> false) entry)
-      | `pdfurl    -> (f (function `pdfurl   v -> true | _ -> false) entry)
-      | `bibtex    -> (f (function `bibtex   v -> true | _ -> false) entry)
-      | `note      -> (f (function `note     v -> true | _ -> false) entry)
-      | `abstract  -> (f (function `abstract v -> true | _ -> false) entry)
-      | `doi       -> (f (function `doi      v -> true | _ -> false) entry)
-      | `citation  -> (f (function `citation v -> true | _ -> false) entry)
-      | `tags      -> (f (function `tags     v -> true | _ -> false) entry)
-      | `keywords  -> (f (function `keywords v -> true | _ -> false) entry)
-      | `comment key ->
-          (f (function `comment (s,v) when s =$= key -> true 
-              | _ -> false) entry)
+  (** Find a field in an entry. *)
+  let find_field (field:field_name) (entry:entry) =
+    let f  = Ls.find_opt in
+    match field with
+    | `id        -> (f (function `id       v -> true | _ -> false) entry)
+    | `authors   -> (f (function `authors  v -> true | _ -> false) entry)
+    | `title     -> (f (function `title    v -> true | _ -> false) entry)
+    | `how       -> (f (function `how      v -> true | _ -> false) entry)
+    | `year      -> (f (function `year     v -> true | _ -> false) entry)
+    | `url       -> (f (function `url      v -> true | _ -> false) entry)
+    | `pdfurl    -> (f (function `pdfurl   v -> true | _ -> false) entry)
+    | `bibtex    -> (f (function `bibtex   v -> true | _ -> false) entry)
+    | `note      -> (f (function `note     v -> true | _ -> false) entry)
+    | `abstract  -> (f (function `abstract v -> true | _ -> false) entry)
+    | `doi       -> (f (function `doi      v -> true | _ -> false) entry)
+    | `citation  -> (f (function `citation v -> true | _ -> false) entry)
+    | `tags      -> (f (function `tags     v -> true | _ -> false) entry)
+    | `keywords  -> (f (function `keywords v -> true | _ -> false) entry)
+    | `comment key ->
+        (f (function `comment (s,v) when s =$= key -> true 
+            | _ -> false) entry)
             
-    let field_or_empty
-        ?(title_style : [`none | `punct ] = `none)
-        ?(authors_style=`comas)
-        (fi:field_name) entry = 
-      match find_field fi entry with
-      | Some (`authors al) -> AuthorList.to_string ~style:authors_style al
-      | Some (`title tit) ->
-          begin match title_style with
-          | `none -> tit
-          | `punct ->
-              begin match tit.[Str.length tit - 1] with
-              | '?' | '.' | '!' -> tit
-              | _ -> tit ^ "."
-              end
-          end
-      | Some (`id id) -> id
-      | Some (`how how) -> how
-      | Some (`year y) -> y
-      | Some (`note n) -> n
-      | Some (`url       s) -> s
-      | Some (`pdfurl    s) -> s
-      | Some (`comment (_, s)) -> s
-      | Some (`bibtex    s) -> s
-      | Some (`abstract  s) -> s
-      | Some (`doi       s) -> s
-      | Some (`citation  s) -> s
-      | Some (`tags      l) -> String.concat ", " l
-      | Some (`keywords  l) -> String.concat ", " l
-      | _ -> ""
+  (** For a given entry, retrieve a field convert to a string. *)
+  let field_or_empty
+      ?(title_style : [`none | `punct ] = `none)
+      ?(authors_style=`comas)
+      (fi:field_name) (entry:entry) = 
+    match find_field fi entry with
+    | Some (`authors al) -> AuthorList.to_string ~style:authors_style al
+    | Some (`title tit) ->
+        begin match title_style with
+        | `none -> tit
+        | `punct ->
+            begin match tit.[Str.length tit - 1] with
+            | '?' | '.' | '!' -> tit
+            | _ -> tit ^ "."
+            end
+        end
+    | Some (`id id) -> id
+    | Some (`how how) -> how
+    | Some (`year y) -> y
+    | Some (`note n) -> n
+    | Some (`url       s) -> s
+    | Some (`pdfurl    s) -> s
+    | Some (`comment (_, s)) -> s
+    | Some (`bibtex    s) -> s
+    | Some (`abstract  s) -> s
+    | Some (`doi       s) -> s
+    | Some (`citation  s) -> s
+    | Some (`tags      l) -> String.concat ", " l
+    | Some (`keywords  l) -> String.concat ", " l
+    | _ -> ""
 
-    let field_name_of_string = function
-      | "id" -> `id 
-      | "authors" -> `authors 
-      | "title" -> `title 
-      | "how" -> `how 
-      | "year" -> `year 
-      | "url" -> `url 
-      | "pdfurl" -> `pdfurl 
-      | "comment" -> `comment "main"
-      | s when (Str.length s >= 8) && (Str.sub s 0 8 =$= "comment-") ->
-          let lgth = Str.length s in
-          let opt = (Str.sub s 8 (lgth - 8)) in
-          (`comment opt)
-      | "bibtex" -> `bibtex 
-      | "note" -> `note 
-      | "abstract" -> `abstract 
-      | "doi" -> `doi 
-      | "citation" -> `citation 
-      | "tags" -> `tags 
-      | "keywords" -> `keywords 
-      | s -> failwith ("field name unrecognizable: " ^ s)
 
-    let sort ?(by=`id) bibset = 
-        let cmp ea eb =
-            let authors_style = `acm in
-            String.compare
-                (field_or_empty ~authors_style by ea)
-                (field_or_empty ~authors_style by eb) in
-        Ls.sort ~cmp bibset
+  (** "Parse" a field name. *)
+  let field_name_of_string: string -> field_name = function
+    | "id" -> `id 
+    | "authors" -> `authors 
+    | "title" -> `title 
+    | "how" -> `how 
+    | "year" -> `year 
+    | "url" -> `url 
+    | "pdfurl" -> `pdfurl 
+    | "comment" -> `comment "main"
+    | s when (Str.length s >= 8) && (Str.sub s 0 8 =$= "comment-") ->
+        let lgth = Str.length s in
+        let opt = (Str.sub s 8 (lgth - 8)) in
+        (`comment opt)
+    | "bibtex" -> `bibtex 
+    | "note" -> `note 
+    | "abstract" -> `abstract 
+    | "doi" -> `doi 
+    | "citation" -> `citation 
+    | "tags" -> `tags 
+    | "keywords" -> `keywords 
+    | s -> failwith ("field name unrecognizable: " ^ s)
+
+  (** Sort the bibliography set (it is functional the original one is
+      not modified). *)
+  let sort ?(by=`id) (bibset:set) : set = 
+    let cmp ea eb =
+      let authors_style = `acm in
+      String.compare
+        (field_or_empty ~authors_style by ea)
+        (field_or_empty ~authors_style by eb) in
+    Ls.sort ~cmp bibset
 
 end
 

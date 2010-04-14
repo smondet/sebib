@@ -100,7 +100,8 @@ string with special tokens which are interpreted as commands:
 {section 1 sec:help_format|The {t|-select} Syntax}
 
 This is given by {q|{t|sebib -help-select}}. 
-Queries are S-Expressions
+Queries are S-Expressions, but the external parentheses may be
+omitted.
 # sebib -help-select | sed -e 's/\([{}#]\)/{\1}/g' | sed -e 's/^ *\((.*)\)/{*}{t|\1}:/' | sed -e 's/\(<[a-z0-9]*>\)/{t|\1}/g' | sed -e 's/->//g' 
 {begin list}
 {*}{t|(ids {t|<id1>} {t|<id2>} {t|<id3>} ...)}:
@@ -126,11 +127,29 @@ Queries are S-Expressions
 {section 1 sec:examples|Examples}
 
 Let's say you have two bibliography files:
-{t|improba_drive_tech.sebib} and
-{t|smone_else_pb_tech.sebib}
-(the file-extensions do not have necessarily to be {t|.sebib}).
+{t|improbadrive.sebib} and
+{t|smonelsepb.sebib}
+(the file-extensions do not have necessarily to be {t|.sebib}). {p}
 
+You want to retrieve a list of IDs, corresponding to references, in both files,
+which have the tags {q '|h2g2} {i|and} {q '|not_read_yet}:
+{code}
+sebib -select "tags h2g2 not_read_yet" -ids improbadrive.sebib smonelsepb.sebib
+{end} {p}
 
+You want an ad-hoc citation, in text mode of the reference whose ID is
+{q '|smith2178} and which is in {t|improbadrive.sebib}:
+{code}
+sebib improbadrive.sebib -select "(ids smith2178)" \
+   -format "@{authors-and}, @{year}. @{title-punct} @{how}"
+{end} {p}
 
+You want to format all the references in {t|smonelsepb.sebib}, in
+HTML, sorted by year, and with a link to their URL (only if they actually have one):
+{code}
+sebib smonelsepb.sebib -format-xml -sort year \
+  -format "<i>@{authors-etal}</i>: <b>@{title-punct}</b> @{year}\
+           (@{if (has url)}<a href=\"@{url}\">URL</a>@{else}No URL@{endif})\
+           <br/>@{n}"
+{end}
 
-{p}{b|TODO{~}{...}}

@@ -1,5 +1,5 @@
 description = "Sebib - Bibliographic database based on S-Expressions"
-version="1"
+version="1.0.0"
 archive(byte)="sebib.cma"
 archive(native)="sebib.cmxa"
 requires = "extlib, pcre, sexplib.core"

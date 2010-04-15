@@ -7,10 +7,18 @@
 {section 1 sec:present|Presentation}
 
 The {link http://sebib.forge.ocamlcore.org/ |{i|Sebib}} project aims
-at providing highly hackable {i|{q|Bibliographic References Management
+at providing a highly hackable {i|{q|Bibliographic References Management
 System}}.  It is a library and a command-line application which handle
 an ad-hoc file format based on {link
 http://en.wikipedia.org/wiki/S-expression |S-Expressions}.
+
+{section 1 sec:news|News}
+
+{i|Sebib} has a quite short history:
+{begin list}
+{*} Thu, 15 Apr 2010: Version {t|1.0.0} released.
+{end}
+
 
 {section 1 sec:documentations|Documentation}
 
@@ -24,10 +32,12 @@ Here are the documentations available:
 
 {section 1 sec:download|Download}
 
-No downloads for now, you can get the code from the SVN.
-Please visit
-{link https://forge.ocamlcore.org/projects/sebib/
-|the project page at ocamlcore.org}.
+The current version is {t|1.0.0}, you may find downloads on the {link
+http://forge.ocamlcore.org/frs/?group_id=154 |downloads} page. {p}
+
+You can also get the code from the SVN, please visit {link
+http://forge.ocamlcore.org/scm/?group_id=154 |the source management
+page}.
 
 
 

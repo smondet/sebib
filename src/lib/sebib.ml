@@ -36,7 +36,7 @@ open Sebib_std
 module Info = struct
 
   (** The version number string. *)
-  let version = "0"
+  let version = "1.0.0"
 
   (** The version string with the name of the library. *)
   let version_string = sprintf "SeBib v. %s" version

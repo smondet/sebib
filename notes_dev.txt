@@ -1,0 +1,14 @@
+
+
+
+The version number is in:
+src/lib/sebib.ml (Info module)
+src/lib/META
+README
+doc/index.brtx
+
+
+
+To upload the documentation:
+scp -r website/* sebmdt@sebib.forge.ocamlcore.org:/home/groups/sebib/htdocs/
+

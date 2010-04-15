@@ -34,7 +34,7 @@ second has all kinds of fields:
 <span class="sym">(</span>
   <span class="sym">(</span>id theidofthesimpleone<span class="sym">)</span> <span class="slc">; Just an advice, if you want good</span>
                            <span class="slc">; hackability, don't use complex strings</span>
-                           <span class="slc">; for ids, juste alpha-numeric characters.</span>
+                           <span class="slc">; for ids, just alpha-numeric characters.</span>
   <span class="sym">(</span>title <span class="str">&quot;The title of the Publication&quot;</span><span class="sym">)</span>
 
   <span class="slc">; 'authors' is a list of couples.</span>

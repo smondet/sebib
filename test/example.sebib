@@ -3,7 +3,7 @@
 (
   (id theidofthesimpleone) ; Just an advice, if you want good
                            ; hackability, don't use complex strings
-                           ; for ids, juste alpha-numeric characters.
+                           ; for ids, just alpha-numeric characters.
   (title "The title of the Publication")
 
   ; 'authors' is a list of couples.

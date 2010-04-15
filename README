@@ -15,6 +15,9 @@ application which handle an ad-hoc file format based on S-Expressions.
 
 BUILD & INSTALL:
 
+You need OMake, and three findlib packages: extlib, sexplib.core, and
+pcre.
+
 Just typing:
   omake
 should check the libraries, and compile everything.

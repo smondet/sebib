@@ -97,7 +97,7 @@ string with special tokens which are interpreted as commands:
 
 
 
-{section 1 sec:help_format|The {t|-select} Syntax}
+{section 1 sec:help_select|The {t|-select} Syntax}
 
 This is given by {q|{t|sebib -help-select}}. 
 Queries are S-Expressions, but the external parentheses may be

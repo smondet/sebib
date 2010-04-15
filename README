@@ -1,29 +1,32 @@
 
-Sebib: S-Expression for BIBliography.
+Sebib: S-Expressions for BIBliography.
 
-
-Source Tree:
-
-\__ OMakefile                            ->  for omake
-\__ OMakeroot                            ->  (idem)
-\__ src                                  ->
- |  \__ lib                              ->  Source of the library
- |   |  \__ OMakefile                    ->
- |   |  \__ sebib_Yaboon_PolyComp.ml     ->    module imported from Yaboon [1]
- |   |  \__ sebib.ml                     ->    module containing most of library
- |   |  \__ sebib_std.ml                 ->    module to 'open'
- |  \__ app                              ->  Source of the application
- |   |  \__ OMakefile                    ->
- |   |  \__ sebib_main.ml                ->    The application code
-\__ test/                                ->
- |  \__ if_format_test.cat               ->
- |  \__ invalid_id.sebib                 ->
- |  \__ invalid_syntax.sebib             ->
- |  \__ valid.sebib                      ->
- |  \__ bibtest.tex                      ->
- |  \__ format_test.cat                  ->
- |  \__ request_test.sh                  ->
+http://sebib.forge.ocamlcore.org
 
 
 
-[1] Yet Another Bunch Of Ocaml Modules: http://code.google.com/p/yaboon/
+The Sebib project aims at providing highly hackable “Bibliographic
+References Management System”. It is a library and a command-line
+application which handle an ad-hoc file format based on S-Expressions.
+
+
+
+
+
+BUILD & INSTALL:
+
+Just typing:
+  omake
+should check the libraries, and compile everything.
+
+You have then these executable binaries:
+* _build/app/sebib.run,
+* _build/app/sebib.opt (optional).
+
+Move and rename one of them to somewhere in your $PATH, and you have
+installed the application.
+
+To install the library, just do:
+  omake install_library
+This will install the sebib library using findlib, depending on your
+OCaml setup this may require root privileges.

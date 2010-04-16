@@ -9,7 +9,7 @@ packages):
 {*}
 {link http://code.google.com/p/ocaml-extlib/
 |ExtLib},
-{*} {t|pcre}
+{*}
 {link http://www.ocaml.info/home/ocaml_sources.html
 |OCaml-PCRE},
 {*} and
@@ -18,13 +18,15 @@ packages):
 (we use only {t|sexplib.core}, no Camlp4).
 {end} {p}
 
-The build process is handled with {link http://omake.metaprl.org/
-|OMake}, but, if you do not have it, you can at least {link
-local:sec:noomake |build the application} directly. {p}
+The build process is handled with
+{link http://omake.metaprl.org/|OMake},
+but, if you do not have it, you can at least
+{link local:sec:noomake |build the application}
+directly. {p}
 
-To generate the documentation, you will need {i|OCamldoc} and {link
-http://bracetax.berlios.de |Bracetax} (the {t|brtx} tool, you do not
-need the library).
+To generate the documentation, you will need {i|OCamldoc} and
+{link http://bracetax.berlios.de |Bracetax}
+(the {t|brtx} tool, you do not need the library).
 
 {section 1 sec:omake|Use OMake}
 

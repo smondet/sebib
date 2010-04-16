@@ -2,13 +2,25 @@
 
 
 The version number is in:
-src/lib/sebib.ml (Info module)
-src/lib/META
-README
-doc/index.brtx
+  src/lib/sebib.ml (Info module)
+  src/lib/META
+  README
+  doc/index.brtx
 
 
+
+
+To back-port to the svn:
+  git archive --format=tar HEAD | tar xv -C ../sebib_forge/trunk
+
+SVN's commit message may use:
+  git --no-pager log --pretty=format:"* %s [%an]%n    %b" 1.0.0..HEAD
+
+When back-porting to the SVN the git should be tagged:
+  git tag svn<date>
+  git push --tags
+ 
 
 To upload the documentation:
-scp -r website/* sebmdt@sebib.forge.ocamlcore.org:/home/groups/sebib/htdocs/
+  scp -r website/* sebmdt@sebib.forge.ocamlcore.org:/home/groups/sebib/htdocs/
 

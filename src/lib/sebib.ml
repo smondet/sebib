@@ -437,36 +437,43 @@ module Parsing = struct
         (Str.sub s pos ((Str.length s) - pos))
     in
 
-    let pos = ref 0 in
+    let pos = ref None in
     let res = ref [] in
+    let terminate = ref false in
     let the_end = Str.length str  in
-    while !pos < the_end do
+    while not !terminate do
       (* printf "pos: %d, the_end: %d\n" !pos the_end; *)
       try 
-        match Sx.parse ~pos:!pos str with
+        match Sx.parse ?parse_pos:!pos str with
         | Sx.Cont (state, _) ->
-            if is_white (Str.sub str !pos (the_end - !pos)) && state then
-              pos := the_end
-            else 
-              let msg =
-                sprintf "Parsing Error (sexplib, unfinished s-expression?) \
+          let cur_pos =
+            match !pos with | None -> 0 | Some p -> p.Sx.Parse_pos.buf_pos in
+          if is_white (Str.sub str cur_pos (the_end - cur_pos)) && state then
+            terminate := true
+          else 
+            let msg =
+              sprintf "Parsing Error (sexplib, unfinished s-expression?) \
                          for string: \"%s\""
-                  (string_abstract !pos 80 str) in
-              raise (Parse_error msg)
+                (string_abstract cur_pos 80 str) in
+            raise (Parse_error msg)
         | Sx.Done (sx, parse_pos) ->
-            pos := parse_pos.Sx.buf_pos;
-            let id, entry = valid_and_parse_entry sx in
-            res := entry :: !res;
+          pos := Some parse_pos;
+          let id, entry = valid_and_parse_entry sx in
+          res := entry :: !res;
       with
-        Sx.Parse_error pe ->
-          let msg =
-            sprintf "Parsing Error (sexplib): %s,  at \
+      | Sx.Parse_error _ -> (* (`Annot pe) | Sx.Parse_error (`Sexp pe) -> *)
+        let cur_pos, cur_line =
+          match !pos with
+          | None -> 0, 0 | Some p -> p.Sx.Parse_pos.buf_pos, p.Sx.Parse_pos.text_line in
+        let msg =
+(*          sprintf "Parsing Error (sexplib): %s,  at \
                  character %d, i.e., %d-th of string: \"%s\""
-              pe.Sx.err_msg pe.Sx.parse_state.Sx.parse_pos.Sx.buf_pos
-              (pe.Sx.parse_state.Sx.parse_pos.Sx.text_char - 1)
-              (string_abstract !pos 80 str)
-          in
-          raise (Parse_error msg)
+            pe.Sx.err_msg pe.Sx.parse_state.Sx.parse_pos.Sx.buf_pos
+            (pe.Sx.parse_state.Sx.parse_pos.Sx.text_char - 1) *)
+          sprintf "Parse Error: XXX line: %d, pos: %d, sexp: \"%s\""
+            cur_line cur_pos (string_abstract cur_pos 80 str)
+        in
+        raise (Parse_error msg)
     done;
     Ls.rev !res
 

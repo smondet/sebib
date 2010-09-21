@@ -96,8 +96,8 @@ module AuthorList = struct
     | `bibtex ->
         String.concat " and "
           (Ls.map (function
-                   | ("", last) -> last
-                   |(first, last) -> sprintf " %s, %s" last first)
+                   | ("", last) -> sprintf "{%s}" last
+                   |(first, last) -> sprintf " {%s}, {%s}" last first)
              authors)
     | `comas_and ->
         let lgth = Ls.length authors in
@@ -574,8 +574,10 @@ module BibTeX = struct
     let leading_whitespace_regexp = 
       Pcre.regexp ~flags:[ `MULTILINE ] "^[ ]*" in
     let field fi entry = 
-      Sebib_sanitize.utf8_to_latex
-        (Biblio.field_or_empty ~authors_style:`bibtex fi entry) in
+      Sebib_sanitize.utf8_to_latex (Biblio.field_or_empty fi entry) in
+    let authors_field entry = 
+      Sebib_sanitize.utf8_to_latex ~with_braces:false
+        (Biblio.field_or_empty ~authors_style:`bibtex `authors entry) in
     let sanitize_title str =
       let subst s = sprintf "{%s}" s in
       Pcre.substitute ~rex:capitals_regexp ~subst str in
@@ -592,7 +594,7 @@ module BibTeX = struct
                 note = {%s}\n\
                 }\n"
           (field `id entry)
-          (field `authors entry)
+          (authors_field entry)
           (sanitize_title (field `title entry))
           (field `how entry)
           (field `year entry)

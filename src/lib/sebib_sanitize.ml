@@ -34,17 +34,17 @@ open Sebib_std
    www.stat.berkeley.edu/~sourav/symbols-a4.pdf 
 *)
 
-let latexify = function
+let latexify ?(with_braces=true) = function
 
   | "\\" -> "\\textbackslash{}"
+  | "}" when with_braces -> "\\}"
+  | "{" when with_braces -> "\\{"
 
   | "$" -> "\\$"
   | "%" -> "\\%"
   | "_" -> "\\_"
-  | "}" -> "\\}"
   | "&" -> "\\&"
   | "#" -> "\\#"
-  | "{" -> "\\{"
   | "^" -> "\\^{}"
 
   | "á" -> "\\'a"
@@ -142,14 +142,14 @@ let latexify = function
 
   | s -> s
 
-let utf8_to_latex str = (
+let utf8_to_latex ?with_braces str = (
   let ascii_buff = Buffer.create 42 in
   let uchar_string uc =
     UTF8.init 1 (fun _ -> uc) in
   UTF8.iter 
     (fun unicode_char ->
        let ministr = uchar_string unicode_char in
-       Buffer.add_string ascii_buff (latexify ministr);)
+       Buffer.add_string ascii_buff (latexify ?with_braces ministr);)
     ((*UTF8.of_string*) str);
   Buffer.contents ascii_buff
 )

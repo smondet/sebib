@@ -290,7 +290,7 @@ module Biblio = struct
     | "keywords" -> `keywords 
     | s -> failwith ("field name unrecognizable: " ^ s)
 
-  (** Sort the bibliography set (it is functional the original one is
+  (** Sort the bibliography set (it is functional, the original one is
       not modified). *)
   let sort ?(by=`id) (bibset:set) : set = 
     let cmp ea eb =
@@ -299,6 +299,18 @@ module Biblio = struct
         (field_or_empty ~authors_style by ea)
         (field_or_empty ~authors_style by eb) in
     Ls.sort ~cmp bibset
+
+  (** Remove redundant entries (by default, using [compare]). *)
+  let unique ?(cmp:(entry -> entry -> bool) option) (s: set) =
+    Ls.unique ?cmp s
+
+  (** Compare two entries by a given field, if the field is not
+  present in both it returns [false]. *)
+  let compare_by_field field a b =
+    match find_field  field a with
+    | Some i -> Some i =@= (find_field field b)
+    | None -> false 
+
 
 end
 

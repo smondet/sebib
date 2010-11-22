@@ -57,6 +57,7 @@ let () = (
   let sort_by = ref "" in
   let output_sebib = ref "" in
   let transform_format: Sebib.Format.text_transformation ref = ref `no in
+  let reverse_sort = ref false in
   
   let arg_cmd ~doc key spec = (key, spec, doc) in
   let commands = [
@@ -133,6 +134,11 @@ let () = (
       "-sort"
       (Arg.Set_string sort_by);
     arg_cmd
+      ~doc:"\n\tReverse the order of the bibliography\n\
+           \t(if -sort is given, -reverse is applied after the sorting)."
+      "-reverse"
+      (Arg.Set reverse_sort);
+    arg_cmd
       ~doc:("\n\
             \tHelp about the -format option")
       "-help-format"
@@ -171,10 +177,14 @@ let () = (
       if !request =$= "" then b 
       else Request.exec (Request.of_string !request) b in
     let sorted =
-      if !sort_by =$= "" then filtered
+      if !sort_by =$= "" then 
+        if !reverse_sort then
+          (Ls.rev filtered)
+        else
+          filtered
       else (
         let by = (Biblio.field_name_of_string !sort_by) in
-        Biblio.sort ~by filtered
+        Biblio.sort ~by ~reverse:!reverse_sort filtered
       ) in
     sorted in
 

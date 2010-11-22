@@ -292,10 +292,13 @@ module Biblio = struct
 
   (** Sort the bibliography set (it is functional, the original one is
       not modified). *)
-  let sort ?(by=`id) (bibset:set) : set = 
+  let sort ?(by=`id) ?(reverse=false) (bibset:set) : set =
+    let may_reverse = 
+      if reverse then fun f a b -> f b a else fun f a b -> f a b in
     let cmp ea eb =
       let authors_style = `acm in
-      String.compare
+      may_reverse
+        String.compare
         (field_or_empty ~authors_style by ea)
         (field_or_empty ~authors_style by eb) in
     Ls.sort ~cmp bibset

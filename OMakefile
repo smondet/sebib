@@ -10,7 +10,7 @@ USE_OCAMLFIND = true
 OCAMLPACKS[] =
    extlib
    pcre
-   sexplib.core
+   sexplib
 
 
 if $(not $(OCAMLFIND_EXISTS))

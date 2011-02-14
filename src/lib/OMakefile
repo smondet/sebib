@@ -22,7 +22,7 @@ reinstall_library:  $(LIB_TO_INSTALL) META
     ocamlfind install $(LIB_NAME) META *.cm[iox] $(LIB_TO_INSTALL)
 
 index.html: $(LIB_NAME).cma sebib.ml
-    ocamlfind ocamldoc -package extlib,pcre,sexplib.core \
+    ocamlfind ocamldoc -package extlib,pcre,sexplib \
       -d . -t "Sebib Library"   -html -colorize-code sebib.ml -sort -I .
 
 doc_library: index.html

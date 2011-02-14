@@ -35,9 +35,10 @@ Here are the documentations available:
 The current version is {t|1.0.0}, you may find downloads on the {link
 http://forge.ocamlcore.org/frs/?group_id=154 |downloads} page. {p}
 
-You can also get the code from the SVN, please visit {link
-http://forge.ocamlcore.org/scm/?group_id=154 |the source management
-page}.
+You can also get the code from the repository at GitHub,
+please visit {link
+https://github.com/smondet/sebib
+|https://github.com/smondet/sebib}.
 
 
 

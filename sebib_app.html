@@ -1,0 +1,96 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <!-- Generated with BraceTax -->
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet"  type="text/css" href="sebib.css" />
+<title>Sebib doc - Application</title>
+    </head>
+    <body>
+<div class="header">
+
+  <h1>The Sebib Command Line Tool</h1>
+</div> <!-- END HEADER -->
+<div class="p">
+   </div>
+<h2 id="sec:usage">Command Line Options</h2>
+<div class="p">  As the command &ldquo;<tt>sebib -help</tt>&rdquo; nicely says, the usage is <pre>sebib [OPTIONS] file1.sebib file2.sebib ...</pre> and the options are: 
+<ul>
+ <li><b><tt>-validate </tt></b> : 	Validate the files, continues if OK, exits(2) if not </li>
+<li><b><tt>-bibtex-able </tt></b> : 	Checks that every entry has either a 'bibtex' field or 	is able to build an acceptable @misc entry (id, title, how), 	continues if OK, exits(3) if not </li>
+<li><b><tt>-stdin </tt></b> : 	Also use stdin as input </li>
+<li><b><tt>-bibtex &lt;file&gt;</tt></b> : 	Output a BibTeX file (- for stdout) </li>
+<li><b><tt>-sebib &lt;file&gt;</tt></b> : 	Output a Sebib file (- for stdout) </li>
+<li><b><tt>-format &lt;string&gt;</tt></b> : 	Output to stdout using the &lt;string&gt; format for each entry 	see -help-format </li>
+<li><b><tt>-format-no-ws </tt></b> : 	Replace all whitespace by sigle spaces in -format's fields  	(except 'bibtex', format sanitizations can be composed following  	command line's order) </li>
+<li><b><tt>-format-latex </tt></b> : 	Sanitize -format's fields for latex  	(except 'bibtex', format sanitizations can be composed following  	command line's order) </li>
+<li><b><tt>-format-xml </tt></b> : 	Sanitize -format's fields for XML formats  	(except 'bibtex', format sanitizations can be composed following  	command line's order) </li>
+<li><b><tt>-ids </tt></b> : 	This is a convenience shortcut for -format "@{id} " </li>
+<li><b><tt>-select &lt;s-expr&gt;</tt></b> : 	Filter the bibliography with a query 	see -help-select </li>
+<li><b><tt>-sort &lt;field&gt;</tt></b> : 	Sort the bibliography following alphabetical order on a given field </li>
+<li><b><tt>-help-format </tt></b> : 	Help about the -format option </li>
+<li><b><tt>-help-select </tt></b> : 	Help about the -select option </li>
+<li><b><tt>-version </tt></b> : 	Print version </li>
+<li><b><tt>-help</tt></b>,<b><tt>--help</tt></b>:  Display this list of options </li>
+</ul>
+  </div>
+<h2 id="sec:help_format">The <tt>-format</tt> Syntax</h2>
+<div class="p">  This is given by &ldquo;<tt>sebib -help-format</tt>&rdquo;.  The <i>format</i> is a string with special tokens which are interpreted as commands: 
+<ul>
+ <li><tt>@{id}             </tt>: id </li>
+<li><tt>@{authors}        </tt>: authors (coma separated list) </li>
+<li><tt>@{authors-and}    </tt>: authors (comas and a 'and' for the last one) </li>
+<li><tt>@{authors-bibtex} </tt>: authors (BibTeX friendly format) </li>
+<li><tt>@{authors-acm}    </tt>: authors (like ACM Ref, with initials) </li>
+<li><tt>@{authors-etal}   </tt>: authors                          (Depending on the number of authors:                             1: Lastname                             2: Lastname1 and Lastname2                             more: Lastname1 et al.) </li>
+<li><tt>@{title}          </tt>: title </li>
+<li><tt>@{title-punct}    </tt>: the title with a dot '.'                          if not already ending with '?', '.', or '!' </li>
+<li><tt>@{how}            </tt>: how </li>
+<li><tt>@{year}           </tt>: year </li>
+<li><tt>@{note}           </tt>: note </li>
+<li><tt>@{url}            </tt>: url </li>
+<li><tt>@{pdfurl}         </tt>: pdfurl </li>
+<li><tt>@{comment}        </tt>: comment tagged "main" (or non-tagged) </li>
+<li><tt>@{comment-&lt;tag&gt;}  </tt>: comment tagged "tag" </li>
+<li><tt>@{bibtex}         </tt>: The (maybe generated) BibTeX entry                         (if there's no `bibtex' field, the entry is generated,                         like for the '-bibtex' option) </li>
+<li><tt>@{abstract}       </tt>: abstract </li>
+<li><tt>@{doi}            </tt>: doi </li>
+<li><tt>@{citation}       </tt>: citation </li>
+<li><tt>@{tags}           </tt>: tags (coma separated list) </li>
+<li><tt>@{keywords}       </tt>: keywords (coma separated list) </li>
+<li><tt>@{@}              </tt>: the '@' character </li>
+<li><tt>@{n}              </tt>: the new-line character </li>
+<li><tt>@{if &lt;expr&gt;} AAA @{else} BBB @{endif} </tt>:                Evaluates &lt;expr&gt; for the entry,                if true, displays AAA, if not, BBB.                (&lt;expr&gt; uses the same syntax as the '-select' option,                 see 'sebib -help-select')  </li>
+</ul>
+    </div>
+<h2 id="sec:help_select">The <tt>-select</tt> Syntax</h2>
+<div class="p">  This is given by &ldquo;<tt>sebib -help-select</tt>&rdquo;.  Queries are S-Expressions, but the external parentheses may be omitted. 
+<ul>
+ <li><tt>(ids <tt>&lt;id1&gt;</tt> <tt>&lt;id2&gt;</tt> <tt>&lt;id3&gt;</tt> ...)</tt>:          the items whose ids are <tt>&lt;id1&gt;</tt>, <tt>&lt;id2&gt;</tt>, ... </li>
+<li><tt>(and <tt>&lt;expr1&gt;</tt> <tt>&lt;expr2&gt;</tt> ...)</tt>:          logical "and" between expressions </li>
+<li><tt>(or <tt>&lt;expr1&gt;</tt> <tt>&lt;expr2&gt;</tt> ...)</tt>:          logical "or" between expressions </li>
+<li><tt>(not <tt>&lt;expr&gt;</tt>)</tt>:          logical negation of an expression </li>
+<li><tt>(tags <tt>&lt;tag1&gt;</tt> <tt>&lt;tag2&gt;</tt> <tt>&lt;tag3&gt;</tt>)</tt>:          look for the tags (it is an intersection, i.e. an "and") </li>
+<li><tt>(matches <tt>&lt;field&gt;</tt> <tt>&lt;regexp&gt;</tt>)</tt>:          look if you find <tt>&lt;regexp&gt;</tt> in <tt>&lt;field&gt;</tt>         The regexp syntax is Perl-Compatible </li>
+<li><tt>(has <tt>&lt;field&gt;</tt>)</tt>:          the field is present         functionally equivalent to <tt>(matches (<tt>&lt;field&gt;</tt> ""))</tt> </li>
+</ul>
+    </div>
+<h2 id="sec:examples">Examples</h2>
+<div class="p">  Let's say you have two bibliography files: <tt>improbadrive.sebib</tt> and <tt>smonelsepb.sebib</tt> (the file-extensions do not have necessarily to be <tt>.sebib</tt>). </div>
+<div class="p">  You want to retrieve a list of IDs, corresponding to references, in both files, which have the tags &lsquo;h2g2&rsquo; <i>and</i> &lsquo;not_read_yet&rsquo;: <pre>
+sebib -select "tags h2g2 not_read_yet" -ids improbadrive.sebib smonelsepb.sebib
+</pre> </div>
+<div class="p">  You want an ad-hoc citation, in text mode of the reference whose ID is &lsquo;smith2178&rsquo; and which is in <tt>improbadrive.sebib</tt>: <pre>
+sebib improbadrive.sebib -select "(ids smith2178)" \
+   -format "@{authors-and}, @{year}. @{title-punct} @{how}"
+</pre> </div>
+<div class="p">  You want to format all the references in <tt>smonelsepb.sebib</tt>, in HTML, sorted by year, and with a link to their URL (only if they actually have one): <pre>
+sebib smonelsepb.sebib -format-xml -sort year \
+  -format "&lt;i&gt;@{authors-etal}&lt;/i&gt;: &lt;b&gt;@{title-punct}&lt;/b&gt; @{year}\
+           (@{if (has url)}&lt;a href=\"@{url}\"&gt;URL&lt;/a&gt;@{else}No URL@{endif})\
+           &lt;br/&gt;@{n}"
+</pre>  </div>
+</body>
+</html>

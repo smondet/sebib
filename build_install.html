@@ -1,0 +1,50 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <!-- Generated with BraceTax -->
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet"  type="text/css" href="sebib.css" />
+<title>Sebib doc - Build &amp; Install</title>
+    </head>
+    <body>
+<div class="header">
+
+  <h1>Build &amp; Install Sebib</h1>
+</div> <!-- END HEADER -->
+<div class="p">
+  </div>
+<h2 id="sec:dependencies">Dependencies</h2>
+<div class="p">  Sebib is written in the wonderful <a href="http://caml.inria.fr">Objective Caml</a> language and depends on 3 libraries (as <i>findlib</i> packages): 
+<ul>
+ <li> <a href="http://code.google.com/p/ocaml-extlib/">ExtLib</a>, </li>
+<li> <a href="http://www.ocaml.info/home/ocaml_sources.html">OCaml-PCRE</a>, </li>
+<li> and <a href="http://www.janestreet.com/ocaml/index.html">Sexplib</a> (we use only <tt>sexplib.core</tt>, no Camlp4). </li>
+</ul>
+ </div>
+<div class="p">  The build process is handled with <a href="http://omake.metaprl.org/">OMake</a>, but, if you do not have it, you can at least <a href="#sec:noomake">build the application</a> directly. </div>
+<div class="p">  To generate the documentation, you will need <i>OCamldoc</i> and <a href="http://bracetax.berlios.de">Bracetax</a> (the <tt>brtx</tt> tool, you do not need the library).  </div>
+<h2 id="sec:omake">Use OMake</h2>
+<div class="p">  Just by typing: <pre>
+omake
+</pre> should check the libraries, and compile everything. </div>
+<div class="p">  You have then these executable binaries: 
+<ul>
+ <li> <tt>_build/app/sebib.run</tt>, </li>
+<li> and preferably, <tt>_build/app/sebib.opt</tt> (if your architecture does not support native compilation you won't have this one).  </li>
+</ul>
+ Move and rename one of them to somewhere in your <tt>$PATH</tt>, and you have installed the application. </div>
+<div class="p">  To install the library, just do: <pre>
+omake install_library
+</pre> This will install the <tt>sebib</tt> library using <i>findlib</i>, depending on your OCaml setup this may require <tt>root</tt> privileges. </div>
+<div class="p">  Other OMake targets may be useful: <tt>doc_site</tt>, <tt>doc_library</tt>, <tt>web_site</tt>, or <tt>clean</tt>.  </div>
+<h2 id="sec:noomake">Without OMake</h2>
+<div class="p">  If you do not have OMake you can get easily the <tt>sebib</tt> application compiled, just run this command: <pre>
+ocamlfind ocamlopt -package extlib,pcre,sexplib.core -linkpkg \
+          src/lib/sebib_Yaboon_PolyComp.ml \
+          src/lib/sebib_std.ml src/lib/sebib_sanitize.ml src/lib/sebib.ml \
+          src/app/sebib_main.ml -I . -I src/lib -o sebib
+</pre> </div>
+</body>
+</html>

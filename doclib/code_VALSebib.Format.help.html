@@ -1,0 +1,48 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Sebib" rel="Chapter" href="Sebib.html"><title>Sebib Library : Sebib.Format.help</title>
+</head>
+<body>
+<code class="code"><span class="keyword">let</span>&nbsp;help&nbsp;=&nbsp;<span class="string">"The&nbsp;format&nbsp;is&nbsp;a&nbsp;string&nbsp;with&nbsp;special&nbsp;patterns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{id}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;id<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{authors}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;authors&nbsp;(coma&nbsp;separated&nbsp;list)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{authors-and}&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;authors&nbsp;(comas&nbsp;and&nbsp;a&nbsp;'and'&nbsp;for&nbsp;the&nbsp;last&nbsp;one)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{authors-bibtex}&nbsp;:&nbsp;authors&nbsp;(BibTeX&nbsp;friendly&nbsp;format)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{authors-acm}&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;authors&nbsp;(like&nbsp;ACM&nbsp;Ref,&nbsp;with&nbsp;initials)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{authors-etal}&nbsp;&nbsp;&nbsp;:&nbsp;authors&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Depending&nbsp;on&nbsp;the&nbsp;number&nbsp;of&nbsp;authors:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1:&nbsp;Lastname<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2:&nbsp;Lastname1&nbsp;and&nbsp;Lastname2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;more:&nbsp;Lastname1&nbsp;et&nbsp;al.)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{title}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;title<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{title-punct}&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;the&nbsp;title&nbsp;with&nbsp;a&nbsp;dot&nbsp;'.'&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;not&nbsp;already&nbsp;ending&nbsp;with&nbsp;'?',&nbsp;'.',&nbsp;or&nbsp;'!'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{how}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;how<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{year}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;year<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{note}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;note<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{url}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;url<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{pdfurl}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;pdfurl<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{comment}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;comment&nbsp;tagged&nbsp;\"main\"&nbsp;(or&nbsp;non-tagged)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{comment-&lt;tag&gt;}&nbsp;&nbsp;:&nbsp;comment&nbsp;tagged&nbsp;\"tag\"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{bibtex}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;(maybe&nbsp;generated)&nbsp;BibTeX&nbsp;entry<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(if&nbsp;there's&nbsp;no&nbsp;`bibtex'&nbsp;field,&nbsp;the&nbsp;entry&nbsp;is&nbsp;generated,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;like&nbsp;for&nbsp;the&nbsp;'-bibtex'&nbsp;option)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{abstract}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;abstract<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{doi}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;doi<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{citation}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;citation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{tags}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;tags&nbsp;(coma&nbsp;separated&nbsp;list)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{keywords}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;keywords&nbsp;(coma&nbsp;separated&nbsp;list)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{@}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;the&nbsp;'@'&nbsp;character<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{n}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;the&nbsp;new-line&nbsp;character<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@{if&nbsp;&lt;expr&gt;}&nbsp;AAA&nbsp;@{else}&nbsp;BBB&nbsp;@{endif}&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Evaluates&nbsp;&lt;expr&gt;&nbsp;for&nbsp;the&nbsp;entry,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;true,&nbsp;displays&nbsp;AAA,&nbsp;if&nbsp;not,&nbsp;BBB.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&lt;expr&gt;&nbsp;uses&nbsp;the&nbsp;same&nbsp;syntax&nbsp;as&nbsp;the&nbsp;'-select'&nbsp;option,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;see&nbsp;'sebib&nbsp;-help-select')<br>
+"</span></code></body></html>

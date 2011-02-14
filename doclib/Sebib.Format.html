@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Sebib.Request.html">
+<link rel="Up" href="Sebib.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Sebib" rel="Chapter" href="Sebib.html"><title>Sebib Library : Sebib.Format</title>
+</head>
+<body>
+<div class="navbar"><a href="Sebib.Request.html">Previous</a>
+&nbsp;<a href="Sebib.html">Up</a>
+&nbsp;</div>
+<center><h1>Module <a href="type_Sebib.Format.html">Sebib.Format</a></h1></center>
+<br>
+<pre><span class="keyword">module</span> Format: <code class="code"><span class="keyword">sig</span></code> <a href="Sebib.Format.html">..</a> <code class="code"><span class="keyword">end</span></code></pre>The "-format" language.<br>
+<hr width="100%">
+<pre><span id="TYPEtext_transformation"><span class="keyword">type</span> <code class="type"></code>text_transformation</span> = <code class="type">[ `composition of<br>           <a href="Sebib.Format.html#TYPEtext_transformation">text_transformation</a> * <a href="Sebib.Format.html#TYPEtext_transformation">text_transformation</a><br>       | `latex<br>       | `no<br>       | `no_ws<br>       | `xml ]</code> </pre>
+<div class="info">
+The possible transformations/sanitizations that can be done on
+  the output.<br>
+</div>
+
+<pre><span id="VALstr"><span class="keyword">val</span> <a href="code_VALSebib.Format.str.html">str</a></span> : <code class="type">pattern:string -><br>       ?transform_text:<a href="Sebib.Format.html#TYPEtext_transformation">text_transformation</a> -><br>       <a href="Sebib.Biblio.html#TYPEset">Sebib.Biblio.set</a> -> string</code></pre><div class="info">
+Execute a pattern on a bibliography set with an optional
+  transformation.<br>
+</div>
+<pre><span id="VALhelp"><span class="keyword">val</span> <a href="code_VALSebib.Format.help.html">help</a></span> : <code class="type">string</code></pre><div class="info">
+The help message about the syntax of the format strings.<br>
+</div>
+</body></html>

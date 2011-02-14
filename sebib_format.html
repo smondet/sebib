@@ -1,0 +1,99 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <!-- Generated with BraceTax -->
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet"  type="text/css" href="sebib.css" />
+<title>Sebib doc - File Format</title>
+    </head>
+    <body>
+<div class="header">
+
+  <h1>Sebib's File Format</h1>
+</div> <!-- END HEADER -->
+<div class="p">
+   A <i>Sebib-file</i> is a concatenation of <i>entries</i>. </div>
+<div class="p">  Each entry is an <a href="http://en.wikipedia.org/wiki/S-expression">S-Expression</a> representing a <i>list</i> of <i>fields</i>. </div>
+<div class="p">  A field is a <i>sexp</i>: <tt>(cmdname arg1 arg2 ...)</tt>. </div>
+<div class="p">  From a lexical point of view, Sebib follows <a href="http://caml.inria.fr/pub/docs/manual-ocaml/lex.html">OCaml's conventions</a> for <tt>string</tt> litterals. </div>
+<div class="p">  As in Lisp, Scheme, or any other S-Expression-based language, comments start with semi-colons (<tt>';'</tt>) and end with end-of-lines. </div>
+<div class="p">  Here is a complete example; two entries, the first has 5 fields, the second has all kinds of fields:     
+<pre class="hl">
+<span class="slc">; A simple example</span>
+<span class="sym">(</span>
+  <span class="sym">(</span>id theidofthesimpleone<span class="sym">)</span> <span class="slc">; Just an advice, if you want good</span>
+                           <span class="slc">; hackability, don't use complex strings</span>
+                           <span class="slc">; for ids, just alpha-numeric characters.</span>
+  <span class="sym">(</span>title <span class="str">&quot;The title of the Publication&quot;</span><span class="sym">)</span>
+
+  <span class="slc">; 'authors' is a list of couples.</span>
+  <span class="sym">(</span>authors <span class="sym">(</span>First Family<span class="sym">) (</span><span class="str">&quot;First2 Middle2&quot;</span> Family2<span class="sym">))</span>
+
+  <span class="sym">(</span>year <span class="num">1999</span><span class="sym">)</span>
+  <span class="sym">(</span>how <span class="str">&quot;Some where...&quot;</span><span class="sym">)</span>
+<span class="sym">)</span>
+
+
+<span class="slc">; A  &quot;complete&quot; example:</span>
+<span class="sym">(   (</span>id most09complete<span class="sym">)</span>
+    <span class="sym">(</span>authors <span class="sym">(</span><span class="str">&quot;John F.&quot;</span> Smith<span class="sym">) (</span>First <span class="str">&quot;Family&quot;</span><span class="sym">))</span>
+    <span class="sym">(</span>title <span class="str">&quot;The most complete example&quot;</span><span class="sym">)</span>
+    <span class="sym">(</span>how <span class="str">&quot;In proceedings of Some workshop or conference&quot;</span><span class="sym">)</span>
+    <span class="sym">(</span>year <span class="str">&quot;1901&quot;</span><span class="sym">)</span>
+
+    <span class="slc">; Keywords or tags are a list of strings:</span>
+    <span class="sym">(</span>keywords <span class="str">&quot;Personal Data Management&quot;</span> <span class="str">&quot;Forty-two&quot;</span><span class="sym">)</span>
+    <span class="sym">(</span>tags onetag onemoretag<span class="sym">)</span>
+
+    <span class="slc">; Most URLs respect the nameing conventions of S-Expressions,</span>
+    <span class="slc">; hence, they often do not need string-escaping:</span>
+    <span class="sym">(</span>url http<span class="sym">://</span>url.to.the<span class="sym">/</span>page?of<span class="sym">&amp;</span>the<span class="sym">&amp;</span>paper<span class="sym">)</span>
+    <span class="sym">(</span>pdfurl http<span class="sym">://</span>link.t.o<span class="sym">/</span>the?pdf<span class="sym">)</span>
+    <span class="sym">(</span>doi <span class="str">&quot;http://some.doi.provider/42.42.42.42&quot;</span><span class="sym">)</span>
+
+
+    <span class="slc">; 'id', 'title', 'authors', 'year', and 'note' will be used</span>
+    <span class="slc">; to generate the BibTeX</span>
+    <span class="slc">; only if you do not provide the 'bibtex' field:</span>
+    <span class="sym">(</span>bibtex <span class="str">&quot;</span>
+<span class="str">&#64;inproceedings{most09complete,</span>
+<span class="str"> author = {Smith, John F. and Family First}</span>
+<span class="str"> title = {The most complete example},</span>
+<span class="str"> booktitle = {Some workshop or conference},</span>
+<span class="str"> year = {1901},</span>
+<span class="str"> pages = {1--13},</span>
+<span class="str"> }</span>
+<span class="str">    &quot;</span><span class="sym">)</span>
+
+    <span class="sym">(</span>note <span class="str">&quot;The note is a special comment which may go to the &#64;misc</span> <span class="esc">\</span>
+<span class="str">    autogenerated entries&quot;</span><span class="sym">)</span>
+
+    <span class="sym">(</span>abstract <span class="str">&quot;Lorem ipsum dolor sit amet, consectetur adipisicing</span>
+<span class="str">    elit, sed do eiusmod tempor incididunt ut labore et dolore magna</span>
+<span class="str">    aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco</span>
+<span class="str">    laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure</span>
+<span class="str">    dolor in reprehenderit in voluptate velit esse cillum dolore eu</span>
+<span class="str">    fugiat nulla pariatur. Excepteur sint occaecat cupidatat non</span>
+<span class="str">    proident, sunt in culpa qui officia deserunt mollit anim id est</span>
+<span class="str">    laborum.&quot;</span><span class="sym">)</span>
+
+    <span class="sym">(</span>citation <span class="str">&quot;Smith and Family, 1999, The most complete example.&quot;</span><span class="sym">)</span>
+
+    <span class="slc">; 'comment' are couples or triplets</span>
+    <span class="sym">(</span>comment <span class="str">&quot;</span>
+<span class="str">        The comment without middle arguments is considered to be</span>
+<span class="str">        the</span> <span class="esc">\&quot;</span><span class="str">main</span><span class="esc">\&quot;</span> <span class="str">one</span>
+<span class="str">        &quot;</span><span class="sym">)</span>
+    <span class="slc">; meaning that (comment &quot;...&quot;) is equivalent to (comment main &quot;...&quot;)</span>
+
+    <span class="sym">(</span>comment short <span class="str">&quot;Another comment, this one is called</span> <span class="esc">\&quot;</span><span class="str">short</span><span class="esc">\&quot; \</span>
+<span class="str">       You may use any middle argument excpet</span> <span class="esc">\&quot;</span><span class="str">main</span><span class="esc">\&quot;</span>
+<span class="str">       (which is equivalent to the no-middle-argument one&quot;</span><span class="sym">)</span>
+<span class="sym">)</span>
+
+</pre>
+ </div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Sebib.AuthorList.html">
+<link rel="next" href="Sebib.Parsing.html">
+<link rel="Up" href="Sebib.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Sebib" rel="Chapter" href="Sebib.html"><title>Sebib Library : Sebib.Biblio</title>
+</head>
+<body>
+<div class="navbar"><a href="Sebib.AuthorList.html">Previous</a>
+&nbsp;<a href="Sebib.html">Up</a>
+&nbsp;<a href="Sebib.Parsing.html">Next</a>
+</div>
+<center><h1>Module <a href="type_Sebib.Biblio.html">Sebib.Biblio</a></h1></center>
+<br>
+<pre><span class="keyword">module</span> Biblio: <code class="code"><span class="keyword">sig</span></code> <a href="Sebib.Biblio.html">..</a> <code class="code"><span class="keyword">end</span></code></pre>Module handling the whole bibliography.<br>
+<hr width="100%">
+<pre><span id="TYPEfield"><span class="keyword">type</span> <code class="type"></code>field</span> = <code class="type">[ `abstract of string<br>       | `authors of <a href="Sebib.AuthorList.html#TYPEt">Sebib.AuthorList.t</a><br>       | `bibtex of string<br>       | `citation of string<br>       | `comment of string * string<br>       | `doi of string<br>       | `how of string<br>       | `id of string<br>       | `keywords of string list<br>       | `note of string<br>       | `pdfurl of string<br>       | `tags of string list<br>       | `title of string<br>       | `url of string<br>       | `year of string ]</code> </pre>
+<div class="info">
+The type of <i>fields</i>.<br>
+</div>
+
+<pre><span id="TYPEfield_name"><span class="keyword">type</span> <code class="type"></code>field_name</span> = <code class="type">[ `abstract<br>       | `authors<br>       | `bibtex<br>       | `citation<br>       | `comment of string<br>       | `doi<br>       | `how<br>       | `id<br>       | `keywords<br>       | `note<br>       | `pdfurl<br>       | `tags<br>       | `title<br>       | `url<br>       | `year ]</code> </pre>
+<div class="info">
+The names of the fields (useful for querying).<br>
+</div>
+
+<pre><span id="TYPEentry"><span class="keyword">type</span> <code class="type"></code>entry</span> = <code class="type"><a href="Sebib.Biblio.html#TYPEfield">field</a> list</code> </pre>
+<div class="info">
+One entry is a list of fields.<br>
+</div>
+
+<pre><span id="TYPEset"><span class="keyword">type</span> <code class="type"></code>set</span> = <code class="type"><a href="Sebib.Biblio.html#TYPEentry">entry</a> list</code> </pre>
+<div class="info">
+A bibliography is a list of entries.<br>
+</div>
+
+<pre><span id="VALis_valid"><span class="keyword">val</span> <a href="code_VALSebib.Biblio.is_valid.html">is_valid</a></span> : <code class="type"><a href="Sebib.Biblio.html#TYPEset">set</a> -> [ `no of <a href="Sebib.Biblio.html#TYPEentry">entry</a> list | `yes ]</code></pre><div class="info">
+Check the validity of the set (i.e. that each entry has an <code class="code"><span class="keywordsign">`</span>id</code>
+      field, if not it returns the list of entries that are wrong.<br>
+</div>
+<pre><span id="VALis_bibtexable"><span class="keyword">val</span> <a href="code_VALSebib.Biblio.is_bibtexable.html">is_bibtexable</a></span> : <code class="type"><a href="Sebib.Biblio.html#TYPEset">set</a> -> [ `no of <a href="Sebib.Biblio.html#TYPEentry">entry</a> list | `yes ]</code></pre><div class="info">
+Check that the bibliography is <i>compatible</i> with BibTeX
+      generation, i.e. that it either has a <code class="code"><span class="keywordsign">`</span>bibtex</code> field, or has an
+      <code class="code"><span class="keywordsign">`</span>id</code>, a <code class="code"><span class="keywordsign">`</span>title</code>, and a <code class="code"><span class="keywordsign">`</span>how</code> (in order to build a '@misc'
+      BibTeX entry).<br>
+</div>
+<pre><span id="VALfind_field"><span class="keyword">val</span> <a href="code_VALSebib.Biblio.find_field.html">find_field</a></span> : <code class="type"><a href="Sebib.Biblio.html#TYPEfield_name">field_name</a> -> <a href="Sebib.Biblio.html#TYPEentry">entry</a> -> <a href="Sebib.Biblio.html#TYPEfield">field</a> option</code></pre><div class="info">
+Find a field in an entry.<br>
+</div>
+<pre><span id="VALfield_or_empty"><span class="keyword">val</span> <a href="code_VALSebib.Biblio.field_or_empty.html">field_or_empty</a></span> : <code class="type">?title_style:[ `none | `punct ] -><br>       ?authors_style:<a href="Sebib.AuthorList.html#TYPEstyle">Sebib.AuthorList.style</a> -><br>       <a href="Sebib.Biblio.html#TYPEfield_name">field_name</a> -> <a href="Sebib.Biblio.html#TYPEentry">entry</a> -> string</code></pre><div class="info">
+For a given entry, retrieve a field convert to a string.<br>
+</div>
+<pre><span id="VALfield_name_of_string"><span class="keyword">val</span> <a href="code_VALSebib.Biblio.field_name_of_string.html">field_name_of_string</a></span> : <code class="type">string -> <a href="Sebib.Biblio.html#TYPEfield_name">field_name</a></code></pre><div class="info">
+"Parse" a field name.<br>
+</div>
+<pre><span id="VALsort"><span class="keyword">val</span> <a href="code_VALSebib.Biblio.sort.html">sort</a></span> : <code class="type">?by:<a href="Sebib.Biblio.html#TYPEfield_name">field_name</a> -><br>       ?reverse:bool -> <a href="Sebib.Biblio.html#TYPEset">set</a> -> <a href="Sebib.Biblio.html#TYPEset">set</a></code></pre><div class="info">
+Sort the bibliography set (it is functional, the original one is
+      not modified).<br>
+</div>
+<pre><span id="VALunique"><span class="keyword">val</span> <a href="code_VALSebib.Biblio.unique.html">unique</a></span> : <code class="type">?cmp:(<a href="Sebib.Biblio.html#TYPEentry">entry</a> -> <a href="Sebib.Biblio.html#TYPEentry">entry</a> -> bool) -><br>       <a href="Sebib.Biblio.html#TYPEset">set</a> -> <a href="Sebib.Biblio.html#TYPEentry">entry</a> list</code></pre><div class="info">
+Remove redundant entries (by default, using <code class="code">compare</code>).<br>
+</div>
+<pre><span id="VALcompare_by_field"><span class="keyword">val</span> <a href="code_VALSebib.Biblio.compare_by_field.html">compare_by_field</a></span> : <code class="type"><a href="Sebib.Biblio.html#TYPEfield_name">field_name</a> -> <a href="Sebib.Biblio.html#TYPEentry">entry</a> -> <a href="Sebib.Biblio.html#TYPEentry">entry</a> -> bool</code></pre><div class="info">
+Compare two entries by a given field, if the field is not
+  present in both it returns <code class="code"><span class="keyword">false</span></code>.<br>
+</div>
+</body></html>

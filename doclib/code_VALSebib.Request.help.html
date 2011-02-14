@@ -1,0 +1,36 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Sebib" rel="Chapter" href="Sebib.html"><title>Sebib Library : Sebib.Request.help</title>
+</head>
+<body>
+<code class="code"><span class="keyword">let</span>&nbsp;help&nbsp;=&nbsp;<span class="string">"Syntax&nbsp;of&nbsp;the&nbsp;'-select'&nbsp;expressions&nbsp;(all&nbsp;parentheses&nbsp;are&nbsp;important):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(ids&nbsp;&lt;id1&gt;&nbsp;&lt;id2&gt;&nbsp;&lt;id3&gt;&nbsp;...)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;the&nbsp;items&nbsp;whose&nbsp;ids&nbsp;are&nbsp;&lt;id1&gt;,&nbsp;&lt;id2&gt;,&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(and&nbsp;&lt;expr1&gt;&nbsp;&lt;expr2&gt;&nbsp;...)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;logical&nbsp;\"and\"&nbsp;between&nbsp;expressions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(or&nbsp;&lt;expr1&gt;&nbsp;&lt;expr2&gt;&nbsp;...)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;logical&nbsp;\"or\"&nbsp;between&nbsp;expressions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(not&nbsp;&lt;expr&gt;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;logical&nbsp;negation&nbsp;of&nbsp;an&nbsp;expression<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(tags&nbsp;&lt;tag1&gt;&nbsp;&lt;tag2&gt;&nbsp;&lt;tag3&gt;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;look&nbsp;for&nbsp;the&nbsp;tags&nbsp;(it&nbsp;is&nbsp;an&nbsp;intersection,&nbsp;i.e.&nbsp;an&nbsp;\"and\")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(matches&nbsp;&lt;field&gt;&nbsp;&lt;regexp&gt;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;look&nbsp;if&nbsp;you&nbsp;find&nbsp;&lt;regexp&gt;&nbsp;in&nbsp;&lt;field&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;regexp&nbsp;syntax&nbsp;is&nbsp;Perl-Compatible<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(has&nbsp;&lt;field&gt;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;the&nbsp;field&nbsp;is&nbsp;present<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;functionally&nbsp;equivalent&nbsp;to&nbsp;(matches&nbsp;(&lt;field&gt;&nbsp;\"\"))<br>
+Examples:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(or&nbsp;(has&nbsp;bibtex)&nbsp;(and&nbsp;(has&nbsp;id)&nbsp;(has&nbsp;authors)&nbsp;(has&nbsp;title)&nbsp;(has&nbsp;how)))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;selects&nbsp;entries&nbsp;which&nbsp;have&nbsp;a&nbsp;bibtex&nbsp;field,&nbsp;or&nbsp;at&nbsp;least,&nbsp;enough<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;information&nbsp;to&nbsp;generate&nbsp;a&nbsp;@misc&nbsp;BibTeX&nbsp;entry.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(matches&nbsp;title&nbsp;comp[a-z]+)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;selects&nbsp;entries&nbsp;whose&nbsp;title&nbsp;field&nbsp;exists&nbsp;and&nbsp;matches&nbsp;the&nbsp;regexp<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(e.g.&nbsp;\"The&nbsp;completion\"&nbsp;matches&nbsp;but&nbsp;\"The&nbsp;comp.\"&nbsp;does&nbsp;not).<br>
+"</span></code></body></html>

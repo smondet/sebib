@@ -16,6 +16,7 @@ http://en.wikipedia.org/wiki/S-expression |S-Expressions}.
 
 {i|Sebib} has a quite short history:
 {begin list}
+{*} Sat, 9 Apr 2011: Version {t|1.1.0} released.
 {*} Thu, 15 Apr 2010: Version {t|1.0.0} released.
 {end}
 
@@ -32,7 +33,7 @@ Here are the documentations available:
 
 {section 1 sec:download|Download}
 
-The current version is {t|1.0.0}, you may find downloads on the {link
+The current version is {t|1.1.0}, you may find downloads on the {link
 http://forge.ocamlcore.org/frs/?group_id=154 |downloads} page. {p}
 
 You can also get the code from the repository at GitHub,

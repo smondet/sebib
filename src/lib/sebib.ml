@@ -36,14 +36,14 @@ open Sebib_std
 module Info = struct
 
   (** The version number string. *)
-  let version = "1.0.0"
+  let version = "1.1.0"
 
   (** The version string with the name of the library. *)
   let version_string = sprintf "SeBib v. %s" version
 
   (** The license string. *)  
   let license = "\
-Copyright (c) 2008, 2009, 2010 Sebastien MONDET\n\
+Copyright (c) 2008, 2009, 2010, 2011 Sebastien MONDET\n\
 \n\
 Permission is hereby granted, free of charge, to any person        \n\
 obtaining a copy of this software and associated documentation     \n\

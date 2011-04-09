@@ -22,13 +22,13 @@ the options are:
 	Output a Sebib file (- for stdout)
 {*}{b|{t|-format <string>}} :
 	Output to stdout using the <string> format for each entry
-	see -help-format
+	see {t|-help-format}
 {*}{b|{t|-format-no-ws }} :
-	Replace all whitespace by sigle spaces in -format's fields 
+	Replace all whitespace by sigle spaces in {t|-format}'s fields 
 	(except 'bibtex', format sanitizations can be composed following 
 	command line's order)
 {*}{b|{t|-format-latex }} :
-	Sanitize -format's fields for latex 
+	Sanitize {t|-format}'s fields for latex 
 	(except 'bibtex', format sanitizations can be composed following 
 	command line's order)
 {*}{b|{t|-format-xml }} :
@@ -36,16 +36,19 @@ the options are:
 	(except 'bibtex', format sanitizations can be composed following 
 	command line's order)
 {*}{b|{t|-ids }} :
-	This is a convenience shortcut for -format "@{{}id{}} "
+	This is a convenience shortcut for {t|-format "@{{}id{}} "}
 {*}{b|{t|-select <s-expr>}} :
 	Filter the bibliography with a query
-	see -help-select
+	see {t|-help-select}
 {*}{b|{t|-sort <field>}} :
 	Sort the bibliography following alphabetical order on a given field
+{*}{b|{t|-reverse}} :
+        Reverse the order of the bibliography
+        (if {t|-sort} is given, {t|-reverse} is applied after the sorting)
 {*}{b|{t|-help-format }} :
-	Help about the -format option
+	Help about the {t|-format} option
 {*}{b|{t|-help-select }} :
-	Help about the -select option
+	Help about the {t|-select} option
 {*}{b|{t|-version }} :
 	Print version
 {*}{b|{t|-help}},{b|{t|--help}}:  Display this list of options

@@ -23,15 +23,16 @@
 <li><b><tt>-stdin </tt></b> : 	Also use stdin as input </li>
 <li><b><tt>-bibtex &lt;file&gt;</tt></b> : 	Output a BibTeX file (- for stdout) </li>
 <li><b><tt>-sebib &lt;file&gt;</tt></b> : 	Output a Sebib file (- for stdout) </li>
-<li><b><tt>-format &lt;string&gt;</tt></b> : 	Output to stdout using the &lt;string&gt; format for each entry 	see -help-format </li>
-<li><b><tt>-format-no-ws </tt></b> : 	Replace all whitespace by sigle spaces in -format's fields  	(except 'bibtex', format sanitizations can be composed following  	command line's order) </li>
-<li><b><tt>-format-latex </tt></b> : 	Sanitize -format's fields for latex  	(except 'bibtex', format sanitizations can be composed following  	command line's order) </li>
+<li><b><tt>-format &lt;string&gt;</tt></b> : 	Output to stdout using the &lt;string&gt; format for each entry 	see <tt>-help-format</tt> </li>
+<li><b><tt>-format-no-ws </tt></b> : 	Replace all whitespace by sigle spaces in <tt>-format</tt>'s fields  	(except 'bibtex', format sanitizations can be composed following  	command line's order) </li>
+<li><b><tt>-format-latex </tt></b> : 	Sanitize <tt>-format</tt>'s fields for latex  	(except 'bibtex', format sanitizations can be composed following  	command line's order) </li>
 <li><b><tt>-format-xml </tt></b> : 	Sanitize -format's fields for XML formats  	(except 'bibtex', format sanitizations can be composed following  	command line's order) </li>
-<li><b><tt>-ids </tt></b> : 	This is a convenience shortcut for -format "@{id} " </li>
-<li><b><tt>-select &lt;s-expr&gt;</tt></b> : 	Filter the bibliography with a query 	see -help-select </li>
+<li><b><tt>-ids </tt></b> : 	This is a convenience shortcut for <tt>-format "@{id} "</tt> </li>
+<li><b><tt>-select &lt;s-expr&gt;</tt></b> : 	Filter the bibliography with a query 	see <tt>-help-select</tt> </li>
 <li><b><tt>-sort &lt;field&gt;</tt></b> : 	Sort the bibliography following alphabetical order on a given field </li>
-<li><b><tt>-help-format </tt></b> : 	Help about the -format option </li>
-<li><b><tt>-help-select </tt></b> : 	Help about the -select option </li>
+<li><b><tt>-reverse</tt></b> :         Reverse the order of the bibliography         (if <tt>-sort</tt> is given, <tt>-reverse</tt> is applied after the sorting) </li>
+<li><b><tt>-help-format </tt></b> : 	Help about the <tt>-format</tt> option </li>
+<li><b><tt>-help-select </tt></b> : 	Help about the <tt>-select</tt> option </li>
 <li><b><tt>-version </tt></b> : 	Print version </li>
 <li><b><tt>-help</tt></b>,<b><tt>--help</tt></b>:  Display this list of options </li>
 </ul>

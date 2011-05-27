@@ -79,7 +79,7 @@ module AuthorList = struct
   type t = author list
 
   (** The formatting style available. *)
-  type style = [ `comas_and | `acm | `bibtex | `comas | `et_al ]
+  type style = [ `comas_and of string | `acm | `bibtex | `comas | `et_al ]
 
   (**/**)
   let initials first_name =
@@ -99,12 +99,15 @@ module AuthorList = struct
                    | ("", last) -> sprintf "{%s}" last
                    |(first, last) -> sprintf " {%s}, {%s}" last first)
              authors)
-    | `comas_and ->
+    | `comas_and the_and ->
         let lgth = Ls.length authors in
         String.concat ", "
           (Ls.mapi (fun i (first, last) ->
                       let strand =
-                        if i = lgth - 1 && i <> 0 then "and " else "" in
+                        if i = lgth - 1 && i <> 0 then 
+                          sprintf "%s " 
+                            (if the_and =$= "" then "and" else the_and)
+                        else "" in
                       sprintf "%s%s %s" strand first last) authors)
     | `comas -> 
         String.concat ", "
@@ -787,8 +790,11 @@ module Format = struct
     let subs stack entry = function
       | "@{id}" when is_write stack ->  strfield `id entry
       | "@{authors}" when is_write stack -> strfield `authors entry
-      | "@{authors-and}" when is_write stack ->
-          strfield ~authors_style:`comas_and `authors entry 
+      | s when sub_eq s 0 13 "@{authors-and" && is_write stack ->
+          let lgth = String.length s in
+          let special_and = 
+            if lgth <> 14 then (String.sub s 14 (lgth - 15)) else "" in
+          strfield ~authors_style:(`comas_and special_and) `authors entry 
       | "@{authors-bibtex}" when is_write stack ->
           strfield ~authors_style:`bibtex `authors entry 
       | "@{authors-acm}" when is_write stack -> 
@@ -855,10 +861,14 @@ module Format = struct
     let help = "\
 The format is a string with special patterns:
     @{id}             : id
-    @{authors}        : authors (coma separated list)
-    @{authors-and}    : authors (comas and a 'and' for the last one)
-    @{authors-bibtex} : authors (BibTeX friendly format)
-    @{authors-acm}    : authors (like ACM Ref, with initials)
+    @{authors}        : authors as a coma separated list
+    @{authors-and <word>}:
+                        authors as a coma separated list and a 'and'
+                        for the last one; if <word> is supplied, use
+                        that word instead of 'and'
+                        (for internationalization)
+    @{authors-bibtex} : authors in a BibTeX friendly format
+    @{authors-acm}    : authors like ACM References, with initials
     @{authors-etal}   : authors 
                         (Depending on the number of authors:
                             1: Lastname

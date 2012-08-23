@@ -466,7 +466,8 @@ module Parsing = struct
         | Sx.Cont (state, _) ->
           let cur_pos =
             match !pos with | None -> 0 | Some p -> p.Sx.Parse_pos.buf_pos in
-          if is_white (Str.sub str cur_pos (the_end - cur_pos)) && state then
+          if is_white (Str.sub str cur_pos (the_end - cur_pos))
+            && state =@= Sx.Cont_state.Parsing_whitespace then
             terminate := true
           else 
             let msg =
